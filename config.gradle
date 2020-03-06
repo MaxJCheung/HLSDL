@@ -1,0 +1,231 @@
+ext {
+
+    release = false
+
+    android = [
+            compileSdkVersion: 28,
+            buildToolsVersion: "28.0.3",
+            minSdkVersion    : 21,
+            targetSdkVersion : 28,
+            versionCode      : 100,
+            versionName      : "1.0.0"
+    ]
+
+    version = [
+            okhttpSdkVersion      : "4.1.0",
+            retrofitSdkVersion    : "2.6.1",
+            glideSdkVersion       : "4.7.1",
+            rxlifecycle2SdkVersion: "2.2.1",
+            canarySdkVersion      : "1.5.4",
+            anko_version          : "0.10.8",
+            roomVersion           : "2.1.0-alpha06",
+    ]
+
+    dependencies = [
+            //support
+            "multidex"                  : "com.android.support:multidex:1.0.1",
+            "appcompat"                 : "androidx.appcompat:appcompat:1.0.2",
+            "design"                    : "com.google.android.material:material:1.0.0-rc01",
+            "legacy"                    : "androidx.legacy:legacy-support-v4:1.0.0",
+            "cardview"                  : "androidx.cardview:cardview:1.0.0",
+            "annotations"               : "androidx.annotation:annotation:1.0.0",
+            "recyclerview"              : "androidx.recyclerview:recyclerview:1.0.0",
+            "nav_fragment"              : "android.arch.navigation:navigation-fragment-ktx:1.0.0-alpha06",
+            "nav_ui_ktx"                : "android.arch.navigation:navigation-ui-ktx:1.0.0-alpha06",
+            "constraintLayout"          : "androidx.constraintlayout:constraintlayout:1.1.3",
+            "coordinatorlayout"         : "androidx.coordinatorlayout:coordinatorlayout:1.0.0",
+            "coroutines"                : "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.2",
+            "coroutines-core"           : "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2",
+
+            //network
+            "retrofit"                  : "com.squareup.retrofit2:retrofit:${version.retrofitSdkVersion}",
+            "retrofit-converter-gson"   : "com.squareup.retrofit2:converter-gson:${version.retrofitSdkVersion}",
+            "retrofit-adapter-rxjava"   : "com.squareup.retrofit2:adapter-rxjava:${version.retrofitSdkVersion}",
+            "retrofit-adapter-rxjava2"  : "com.squareup.retrofit2:adapter-rxjava2:${version.retrofitSdkVersion}",
+
+            "retrofit-url-manager"      : "me.jessyan:retrofit-url-manager:1.4.0",
+            "okhttp3"                   : "com.squareup.okhttp3:okhttp:${version.okhttpSdkVersion}",
+            "okhttp-urlconnection"      : "com.squareup.okhttp:okhttp-urlconnection:${version.okhttpSdkVersion}",
+            "okhttp_logging_interceptor": "com.squareup.okhttp3:logging-interceptor:${version.okhttpSdkVersion}",
+
+            "glide"                     : "com.github.bumptech.glide:glide:${version.glideSdkVersion}",
+            "glide-compiler"            : "com.github.bumptech.glide:compiler:${version.glideSdkVersion}",
+            "glide-transform"           : "jp.wasabeef:glide-transformations:4.1.0",
+
+            //view
+            //"qmui"                      : "com.qmuiteam:qmui:1.1.10",
+            statusBarCompat             : "com.github.goweii:StatusBarCompat:1.2.1",
+
+            //rx2
+            "rxandroid2"                : "io.reactivex.rxjava2:rxandroid:2.0.2",
+            "rxjava2"                   : "io.reactivex.rxjava2:rxjava:2.1.12",
+            "rxjava2-adapter"           : "com.squareup.retrofit2:adapter-rxjava2:2.2.0",
+            "rxlifecycle2"              : "com.trello.rxlifecycle2:rxlifecycle:${version.rxlifecycle2SdkVersion}",
+            "rxlifecycle2-android"      : "com.trello.rxlifecycle2:rxlifecycle-android:${version.rxlifecycle2SdkVersion}",
+            "rxlifecycle2-components"   : "com.trello.rxlifecycle2:rxlifecycle-components:${version.rxlifecycle2SdkVersion}",
+            "rxpermissions2"            : "com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar",
+            "rxerrorhandler2"           : "me.jessyan:rxerrorhandler:2.1.1",
+            "retrofit-cache-lib-rx"     : "ren.yale.android:retrofitcachelibrx2:1.0.9",
+            "disklrucache"              : "com.jakewharton:disklrucache:2.0.2",
+
+            //tools
+            "androideventbus"           : "org.simple:androideventbus:1.0.5.1",
+//            "utils"                     : "com.blankj:utilcode:1.26.0",
+            "kodein"                    : "org.kodein.di:kodein-di-generic-jvm:5.2.0",
+
+            //test
+            "canary-debug"              : "com.squareup.leakcanary:leakcanary-android:${version.canarySdkVersion}",
+            "canary-release"            : "com.squareup.leakcanary:leakcanary-android-no-op:${version.canarySdkVersion}",
+            "stetho"                    : "com.facebook.stetho:stetho:1.5.0",
+            "stetho-http"               : "com.facebook.stetho:stetho-okhttp3:1.5.0",
+
+            //jpush
+            "jpush"                     : "cn.jiguang.sdk:jpush:3.1.2",
+            "jpush-core"                : "cn.jiguang.sdk:jcore:1.2.0",
+
+            anko_commons                : "org.jetbrains.anko:anko-commons:${version.anko_version}",
+            anko_design                 : "org.jetbrains.anko:anko-design:${version.anko_version}",
+            anko_sdk                    : "org.jetbrains.anko:anko-sdk25:${version.anko_version}",
+            anko_appcompact             : "org.jetbrains.anko:anko-appcompat-v7:${version.anko_version}",
+            anko_coroutines             : "org.jetbrains.anko:anko-sdk25-coroutines:${version.anko_version}",
+            anko_v7_coroutines          : "org.jetbrains.anko:anko-appcompat-v7-coroutines:${version.anko_version}",
+            kotlin_stdlib               : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlin_version}",
+            kotlin_basequickadapter     : "com.github.goweii:BaseRecyclerViewAdapterHelper:2.9.51",
+
+            easy_android                : "com.github.yjfnypeu:EasyAndroid:1.2.3",
+            ktlint                      : "com.pinterest:ktlint:0.33.0",
+            lottie                      : "com.airbnb.android:lottie:2.8.0",
+            crashActivity               : "cat.ereza:customactivityoncrash:2.2.0",
+            vercode_input               : "com.justkiddingbaby:vercodeedittext:1.1.0",
+
+            youzan                      : "com.youzanyun.open.mobile:x5sdk:6.4.14",
+            qrcode                      : "com.github.goweii:ZXingLite:1.2.0-androidx",
+
+            arouter                     : "com.alibaba:arouter-api:1.4.1",
+            arouter_compiler            : "com.alibaba:arouter-compiler:1.2.2",
+
+            addSelector                 : "com.github.linkmaxzhang:JDAddressSelector:1.1.9",
+            cos                         : "com.tencent.qcloud:cosxml:5.4.19",
+            viewpagerIndicator          : "com.shizhefei:ViewPagerIndicator:1.1.9",
+            banner                      : "com.youth.banner:banner:1.4.10",
+            wechatPay                   : "com.tencent.mm.opensdk:wechat-sdk-android-without-mta:5.5.3",
+
+            ringProgressBar             : "com.github.HotBitmapGG:RingProgressBar:V1.2.3",
+            latex                       : "com.github.goweii:FlexibleRichTextView:1.1.8",
+            ocr                         : "com.github.linkmaxzhang:OCRLib:1.0.1",
+            flowLayout                  : "com.hyman:flowlayout-lib:1.1.2",
+
+            pdfViewer                   : "com.github.barteksc:android-pdf-viewer:3.1.0-beta.1",
+            okDownloaderCore            : "com.liulishuo.okdownload:okdownload:1.0.5",
+            okDownloader                : "com.liulishuo.okdownload:okhttp:1.0.5",
+            im                          : "com.tencent.imsdk:imsdk:4.6.1",
+
+            room_runtime                : "androidx.room:room-runtime:${version.roomVersion}",
+            room_rx                     : "androidx.room:room-rxjava2:${version.roomVersion}",
+            room_compile                : "androidx.room:room-compiler:${version.roomVersion}",
+            room_ktx                    : "androidx.room:room-ktx:${version.roomVersion}",
+
+            udesk                       : "com.github.linkmaxzhang:UdeskSDK:-SNAPSHOT",
+            markdown_processor          : "com.yydcdut:markdown-processor:0.1.3",
+
+            huawei_base                 : "com.huawei.android.hms:base:2.6.3.301",
+            huawei_push                 : "com.huawei.android.hms:push:2.6.3.301",
+
+            swipeRefresh                : "com.github.Aspsine:SwipeToLoadLayout:1.0.4",
+
+            buglySdk                    : "com.tencent.bugly:crashreport:3.1.0",
+            buglyNdk                    : "com.tencent.bugly:nativecrashreport:3.7.1",
+
+            pdfBox                      : "com.tom_roush:pdfbox-android:1.8.10.1",
+
+            tbs                         : "com.tencent.tbs.tbssdk:sdk:43697",
+            doodleView                  : "com.github.linkmaxzhang:Doodle:5.5.7",
+            anyLayer                    : "com.github.goweii:AnyLayer:3.4.1-androidx",
+            leakCanary                  : "com.squareup.leakcanary:leakcanary-android:2.0-beta-3",
+            meizuPush                   : "com.meizu.flyme.internet:push-internal:3.8.6",
+            oppoPush                    : "com.heytap.mcssdk:mcssdk:2.0.2",
+
+            indicator                   : "com.github.MaxJCheung:PagerIndicator:0.3.1",
+
+            gson                        : "com.google.code.gson:gson:2.8.6",
+
+            SmartRefreshLayout          : "com.scwang.smartrefresh:SmartRefreshLayout:1.1.0",
+            x5dsbridge                  : "com.github.MaxJCheung:DSBridge-Android:3.0.1",
+
+            aria                        : "com.arialyy.aria:core:3.8.6",
+            aria_compiler               : "com.arialyy.aria:compiler:3.8.6",
+            aria_m3u8                   : "com.arialyy.aria:m3u8Component:3.8.6"
+    ]
+
+    constant = [
+            "dbVersion"                : '1',
+            "projectId"                : '1001',
+            "applicationId"            : "com.mba.logic",
+
+            "keyAlias"                 : 'mba',
+            "keyPassword"              : 'lq000000',
+            "storeFile"                : '../mba.keystore',
+            "storePassword"            : 'lq000000',
+
+            "releaseBaseUrl"           : '"https://api.mbadashi.com/app/v1/"',
+            "releaseBaseUploadUrl"     : '"https://ssl.mbadashi.com/upload/"',
+            "releaseMockDetailUrl"     : '"https://exam.mbadashi.com/exam_detail"',
+            "releaseMockBeginUrl"      : '"https://exam.mbadashi.com/exam_begin"',
+            "releaseSchoolDetailUrl"   : '"https://agreement.mbadashi.com/school.html"',
+
+            "devBaseUrl"               : '"https://api.qa.mbadashi.com/app/v1/"',
+            "devBaseUploadUrl"         : '"https://sslqa.mbadashi.com/upload/"',
+            "devMockDetailUrl"         : '"https://exam.qa.mbadashi.com/exam_detail"',
+            "devMockBeginUrl"          : '"https://exam.qa.mbadashi.com/exam_begin"',
+            "devSchoolDetailUrl"       : '"https://agreement.mbadashi.com/school.html"',
+
+            "releaseWebUrl"            : '"mbadashi"',
+            "devWebUrl"                : '"mbadashi"',
+
+            "jpushAppKey"              : "28cf1d2a8fdf857cb0ae2132",
+            "jpushChannel"             : "developer-default",
+
+            "mobAppKey"                : "17c357ef59170",
+            "mobSecret"                : "abaf00bb595fda23c450f6b97586e9e6",
+
+            "wechatAppId"              : '"wxc00690c00d0e8648"',
+            "wechatSecret"             : '"dff570540e75696fb4150a99250fc552"',
+
+            "wechatAppIdForMiniProgram": '"wx16ebe7c25743e3f3"',
+
+            "qqAppId"                  : "1105491271",
+            "qqAppKey"                 : "cebnyL7OJZNiZs3S",
+
+            "youzan_client"            : '"c18707d267fb1cc347"',
+
+            "cos_appid"                : '"1252824710"',
+            "cos_region"               : '"ap-guangzhou"',
+            "cos_bucket_debug"         : '"mbatest"',
+            "cos_bucket_release"       : '"mbaprod"',
+
+            "vod_appid"                : "1400159363",
+            "vod_appid_rlease"         : "1400177511",
+
+            "youzan_url"               : '"https://h5.youzan.com/v2/feature/36MkfhxJ7j"',
+
+            "udesk_app_id"             : '"f4218f340ba74cc8"',
+            "udesk_app_key"            : '"5e40fe68dcaa953827320e815e55bb24"',
+            "udesk_domain"             : '"mbadashi.s2.udesk.cn"',
+
+            "tim_app_id_debug"         : '"1400200480"',
+            "tim_app_id_release"       : '"1400132799"',
+            "tim_account_type_debug"   : '"36862"',
+            "tim_account_type_release" : '"36565"',
+
+            xiaomiPushAppId            : '"2882303761517493339"',
+            xiaomiPushAppKey           : '"5861749362339"',
+
+            buglyAppID                 : '"1400200480"',
+            meizuAppId                 : '"125929"',
+            meizuAppKey                : '"132e775800ae4a8ebdd8559b1c229a38"',
+            oppoAppKey                 : '"Ep81mXgbnr40ss0cSGCkcGks8"',
+            oppoSecret                 : '"5424F4E1499B2D0AE70C0fAFc8371a62"',
+
+    ]
+
+}
