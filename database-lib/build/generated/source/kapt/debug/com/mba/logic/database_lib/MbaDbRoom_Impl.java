@@ -13,8 +13,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.sqlite.db.SupportSQLiteOpenHelper;
 import androidx.sqlite.db.SupportSQLiteOpenHelper.Callback;
 import androidx.sqlite.db.SupportSQLiteOpenHelper.Configuration;
-import com.mba.logic.database_lib.coroutine.HLSDDao;
-import com.mba.logic.database_lib.coroutine.HLSDDao_Impl;
+import com.mba.logic.database_lib.coroutine.HDLDao;
+import com.mba.logic.database_lib.coroutine.HDLDao_Impl;
 import java.lang.IllegalStateException;
 import java.lang.Override;
 import java.lang.String;
@@ -25,21 +25,23 @@ import java.util.Set;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public final class MbaDbRoom_Impl extends MbaDbRoom {
-  private volatile HLSDDao _hLSDDao;
+  private volatile HDLDao _hDLDao;
 
   @Override
   protected SupportSQLiteOpenHelper createOpenHelper(DatabaseConfiguration configuration) {
     final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(configuration, new RoomOpenHelper.Delegate(1) {
       @Override
       public void createAllTables(SupportSQLiteDatabase _db) {
-        _db.execSQL("CREATE TABLE IF NOT EXISTS `TSModel` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hlsUrl` TEXT NOT NULL, `tsUrl` TEXT NOT NULL, `localPath` TEXT NOT NULL, `size` INTEGER NOT NULL, `state` INTEGER NOT NULL)");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `TSEntity` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hlsUrl` TEXT NOT NULL, `tsUrl` TEXT NOT NULL, `localPath` TEXT NOT NULL, `size` INTEGER NOT NULL, `state` INTEGER NOT NULL)");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `HDLEntity` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hlsUrl` TEXT NOT NULL, `extraEntity` TEXT NOT NULL, `localDir` TEXT NOT NULL, `state` INTEGER NOT NULL)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"25dba9b7a822ece7bfcd0efbea074e1e\")");
+        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"1e2f86c6632d8b51b4f551d4008084ec\")");
       }
 
       @Override
       public void dropAllTables(SupportSQLiteDatabase _db) {
-        _db.execSQL("DROP TABLE IF EXISTS `TSModel`");
+        _db.execSQL("DROP TABLE IF EXISTS `TSEntity`");
+        _db.execSQL("DROP TABLE IF EXISTS `HDLEntity`");
       }
 
       @Override
@@ -73,24 +75,39 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
 
       @Override
       protected void validateMigration(SupportSQLiteDatabase _db) {
-        final HashMap<String, TableInfo.Column> _columnsTSModel = new HashMap<String, TableInfo.Column>(6);
-        _columnsTSModel.put("id", new TableInfo.Column("id", "INTEGER", true, 1));
-        _columnsTSModel.put("hlsUrl", new TableInfo.Column("hlsUrl", "TEXT", true, 0));
-        _columnsTSModel.put("tsUrl", new TableInfo.Column("tsUrl", "TEXT", true, 0));
-        _columnsTSModel.put("localPath", new TableInfo.Column("localPath", "TEXT", true, 0));
-        _columnsTSModel.put("size", new TableInfo.Column("size", "INTEGER", true, 0));
-        _columnsTSModel.put("state", new TableInfo.Column("state", "INTEGER", true, 0));
-        final HashSet<TableInfo.ForeignKey> _foreignKeysTSModel = new HashSet<TableInfo.ForeignKey>(0);
-        final HashSet<TableInfo.Index> _indicesTSModel = new HashSet<TableInfo.Index>(0);
-        final TableInfo _infoTSModel = new TableInfo("TSModel", _columnsTSModel, _foreignKeysTSModel, _indicesTSModel);
-        final TableInfo _existingTSModel = TableInfo.read(_db, "TSModel");
-        if (! _infoTSModel.equals(_existingTSModel)) {
-          throw new IllegalStateException("Migration didn't properly handle TSModel(com.mba.logic.database_lib.TSModel).\n"
-                  + " Expected:\n" + _infoTSModel + "\n"
-                  + " Found:\n" + _existingTSModel);
+        final HashMap<String, TableInfo.Column> _columnsTSEntity = new HashMap<String, TableInfo.Column>(6);
+        _columnsTSEntity.put("id", new TableInfo.Column("id", "INTEGER", true, 1));
+        _columnsTSEntity.put("hlsUrl", new TableInfo.Column("hlsUrl", "TEXT", true, 0));
+        _columnsTSEntity.put("tsUrl", new TableInfo.Column("tsUrl", "TEXT", true, 0));
+        _columnsTSEntity.put("localPath", new TableInfo.Column("localPath", "TEXT", true, 0));
+        _columnsTSEntity.put("size", new TableInfo.Column("size", "INTEGER", true, 0));
+        _columnsTSEntity.put("state", new TableInfo.Column("state", "INTEGER", true, 0));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysTSEntity = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesTSEntity = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoTSEntity = new TableInfo("TSEntity", _columnsTSEntity, _foreignKeysTSEntity, _indicesTSEntity);
+        final TableInfo _existingTSEntity = TableInfo.read(_db, "TSEntity");
+        if (! _infoTSEntity.equals(_existingTSEntity)) {
+          throw new IllegalStateException("Migration didn't properly handle TSEntity(com.mba.logic.database_lib.TSEntity).\n"
+                  + " Expected:\n" + _infoTSEntity + "\n"
+                  + " Found:\n" + _existingTSEntity);
+        }
+        final HashMap<String, TableInfo.Column> _columnsHDLEntity = new HashMap<String, TableInfo.Column>(5);
+        _columnsHDLEntity.put("id", new TableInfo.Column("id", "INTEGER", true, 1));
+        _columnsHDLEntity.put("hlsUrl", new TableInfo.Column("hlsUrl", "TEXT", true, 0));
+        _columnsHDLEntity.put("extraEntity", new TableInfo.Column("extraEntity", "TEXT", true, 0));
+        _columnsHDLEntity.put("localDir", new TableInfo.Column("localDir", "TEXT", true, 0));
+        _columnsHDLEntity.put("state", new TableInfo.Column("state", "INTEGER", true, 0));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysHDLEntity = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesHDLEntity = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoHDLEntity = new TableInfo("HDLEntity", _columnsHDLEntity, _foreignKeysHDLEntity, _indicesHDLEntity);
+        final TableInfo _existingHDLEntity = TableInfo.read(_db, "HDLEntity");
+        if (! _infoHDLEntity.equals(_existingHDLEntity)) {
+          throw new IllegalStateException("Migration didn't properly handle HDLEntity(com.mba.logic.database_lib.HDLEntity).\n"
+                  + " Expected:\n" + _infoHDLEntity + "\n"
+                  + " Found:\n" + _existingHDLEntity);
         }
       }
-    }, "25dba9b7a822ece7bfcd0efbea074e1e", "44b8ff0f5fefbd0a8cc9abce9c807387");
+    }, "1e2f86c6632d8b51b4f551d4008084ec", "fa1d6d650c21fbe61de2da38eedd8548");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(configuration.context)
         .name(configuration.name)
         .callback(_openCallback)
@@ -103,7 +120,7 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
   protected InvalidationTracker createInvalidationTracker() {
     final HashMap<String, String> _shadowTablesMap = new HashMap<String, String>(0);
     HashMap<String, Set<String>> _viewTables = new HashMap<String, Set<String>>(0);
-    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "TSModel");
+    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "TSEntity","HDLEntity");
   }
 
   @Override
@@ -112,7 +129,8 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
     final SupportSQLiteDatabase _db = super.getOpenHelper().getWritableDatabase();
     try {
       super.beginTransaction();
-      _db.execSQL("DELETE FROM `TSModel`");
+      _db.execSQL("DELETE FROM `TSEntity`");
+      _db.execSQL("DELETE FROM `HDLEntity`");
       super.setTransactionSuccessful();
     } finally {
       super.endTransaction();
@@ -124,15 +142,15 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
   }
 
   @Override
-  public HLSDDao cMbaDao() {
-    if (_hLSDDao != null) {
-      return _hLSDDao;
+  public HDLDao cMbaDao() {
+    if (_hDLDao != null) {
+      return _hDLDao;
     } else {
       synchronized(this) {
-        if(_hLSDDao == null) {
-          _hLSDDao = new HLSDDao_Impl(this);
+        if(_hDLDao == null) {
+          _hDLDao = new HDLDao_Impl(this);
         }
-        return _hLSDDao;
+        return _hDLDao;
       }
     }
   }

@@ -32,8 +32,8 @@ object HDLRepos : IHDLRepos, CoroutineScope by CoroutineScope(Dispatchers.IO) {
         execute(func, err, callback)
     }
 
-    override fun insert(func: () -> Int, err: ((e: Exception) -> Unit)?, callback: (result: Int) -> Unit) {
-        execute<Int>(func, err, callback)
+    override fun insert(func: () -> Long, err: ((e: Exception) -> Unit)?, callback: (result: Long) -> Unit) {
+        execute<Long>(func, err, callback)
     }
 
     override fun update(func: () -> Int, err: ((e: Exception) -> Unit)?, callback: (result: Int) -> Unit) {

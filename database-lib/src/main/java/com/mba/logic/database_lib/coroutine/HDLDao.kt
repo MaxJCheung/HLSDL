@@ -1,20 +1,36 @@
 package com.mba.logic.database_lib.coroutine
 
 import androidx.room.*
-import com.mba.logic.database_lib.*
+import com.mba.logic.database_lib.HDLEntity
+import com.mba.logic.database_lib.TSEntity
 
 /**
  *Create by max　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
  */
 
 @Dao
-abstract class HLSDDao : TSDao {
+interface HDLDao : TSDao {
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertHdlEntity(hdlEntity: HDLEntity): Long
+
+    @Query("update HDLEntity set state= :state where hlsUrl= :hdlUrl")
+    fun updateHdlState(hdlUrl: String, state: Int): Int
 }
 
 @Dao
-interface TSDao{
+interface TSDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertTSModel(vararg tsModel: TSModel)
+    fun insertTSModel(vararg tsEntity: TSEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertTSModels(tsEntities: List<TSEntity>)
+
+    @Query("update TSEntity set state = :state where tsUrl = :tsUrl ")
+    fun updateTSState(tsUrl: String, state: Int): Int
+
+    @Query("update TSEntity set state = :state , localPath= :filePath where tsUrl = :tsUrl ")
+    fun updateTS(tsUrl: String, state: Int, filePath: String): Int
 }
+
