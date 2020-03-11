@@ -12,17 +12,21 @@ import com.mba.logic.database_lib.TSEntity
  */
 
 @Dao
-abstract class HDLDao : TSDao, HdlDao {
-
-}
-
-@Dao
-interface HdlDao {
+interface HDLDao : TSDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertHdlEntity(hdlEntity: HDLEntity): Long
 
     @Query("update HDLEntity set state= :state where hlsUrl= :hdlUrl")
     fun updateHdlState(hdlUrl: String, state: Int): Int
+
+    @Query("update TSEntity set state= :state where hlsUrl= :hdlUrl")
+    fun updateHdlTsState(hdlUrl: String, state: Int): Int
+
+    @Query("update TSEntity set state= :state where hlsUrl= :hdlUrl and state != :excludeState")
+    fun updateHdlTsStateExclude(hdlUrl: String, state: Int, excludeState: Int): Int
+
+    @Query("select * from HDLEntity")
+    fun queryAllTask(): List<HDLEntity>
 }
 
 @Dao

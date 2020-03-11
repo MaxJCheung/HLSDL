@@ -7,8 +7,10 @@ import com.max.hlsdl.config.HDLConfig
 import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.engine.EventCenter
 import com.max.hlsdl.engine.M3U8Reader
+import com.max.hlsdl.engine.TsDownloader
 import com.max.hlsdl.utils.DbHelper
 import com.max.hlsdl.utils.logD
+import com.mba.logic.database_lib.HDLEntity
 import com.mba.logic.database_lib.HDlDb
 import com.mba.logic.database_lib.coroutine.HDLRepos
 
@@ -73,6 +75,33 @@ class HDL {
 
     fun unRegister(obj: IHdlEventCallback) {
         EventCenter.get().removeCallback(obj)
+    }
+
+    fun pause(taskEntity: TaskEntity) {
+        if(waitingEntityList.contains(taskEntity)){
+            val url=taskEntity.hdlEntity.hlsUrl
+            waitingEntityList.filter { it.hdlEntity.hlsUrl == url }.forEach {
+                waitingEntityList.remove(taskEntity)
+                HDLRepos.transaction({ DbHelper.Dao.updateHdlState(url, HDLState.PAUSE) },
+                    { DbHelper.Dao.updateHdlTsStateExclude(url, HDLState.PAUSE,HDLState.COMPLETE) }) {
+                    EventCenter.get().postEvent(HDLState.PAUSE, taskEntity.hdlEntity)
+                }
+            }
+        }else if(runningEntityList.contains(taskEntity)){
+            runningEntityList.filter { it.hdlEntity.hlsUrl == taskEntity.hdlEntity.hlsUrl }.forEach {
+                if (M3U8Reader.get().isRunning(taskEntity)) {
+                    M3U8Reader.get().pause(taskEntity)
+                } else {
+                    TsDownloader.get().pause(it)
+                }
+            }
+        }
+    }
+
+    fun listTask(callback: (hdlEntityList: List<HDLEntity>) -> Unit) {
+        HDLRepos.query({ DbHelper.Dao.queryAllTask() }) {
+            callback.invoke(it)
+        }
     }
 
 }

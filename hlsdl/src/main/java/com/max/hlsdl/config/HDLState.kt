@@ -10,4 +10,5 @@ object HDLState {
     const val COMPLETE = 3
     const val ERR = 4
     const val START = 5
+    const val PAUSE = 6
 }

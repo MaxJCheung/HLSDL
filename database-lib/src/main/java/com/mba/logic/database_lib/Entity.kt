@@ -2,6 +2,7 @@ package com.mba.logic.database_lib
 
 import android.net.Uri
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity
@@ -32,8 +33,10 @@ data class HDLEntity(
     var extraEntity: String = "",
     var localDir: String = "",
     var state: Int = -1,
-    var tsEntities: List<TSEntity>
+    @Ignore
+    var tsEntities: List<TSEntity> = arrayListOf()
 ) {
+
     fun filterStateTs(state: Int): List<TSEntity> {
         return tsEntities.filter { it.state == state }
     }

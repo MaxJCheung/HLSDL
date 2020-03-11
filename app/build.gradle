@@ -16,4 +16,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation rootProject.ext.dependencies["stetho"]
     implementation rootProject.ext.dependencies["easy_android"]
+    implementation rootProject.ext.dependencies["kotlin_basequickadapter"]
+    implementation rootProject.ext.dependencies["recyclerview"]
 }

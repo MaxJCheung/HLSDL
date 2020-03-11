@@ -4,7 +4,7 @@ android {
 }
 
 dependencies {
-    implementation project(':database-lib')
+    api project(':database-lib')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation rootProject.ext.dependencies["kotlin_stdlib"]
     implementation rootProject.ext.dependencies["gson"]

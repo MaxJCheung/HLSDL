@@ -66,6 +66,11 @@ class EventCenter {
                     it.onStart(hdlEntity)
                 }
             }
+            HDLState.PAUSE -> {
+                callbackList.forEach {
+                    it.onPause(hdlEntity)
+                }
+            }
         }
     }
 }
