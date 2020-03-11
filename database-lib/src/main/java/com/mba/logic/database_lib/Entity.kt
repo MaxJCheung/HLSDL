@@ -31,5 +31,14 @@ data class HDLEntity(
     var hlsUrl: String = "",
     var extraEntity: String = "",
     var localDir: String = "",
-    var state: Int = -1
-)
+    var state: Int = -1,
+    var tsEntities: List<TSEntity>
+) {
+    fun filterStateTs(state: Int): List<TSEntity> {
+        return tsEntities.filter { it.state == state }
+    }
+
+    fun percent(state: Int): Int {
+        return (filterStateTs(state).size.div(tsEntities.size.toFloat()) * 100).toInt()
+    }
+}

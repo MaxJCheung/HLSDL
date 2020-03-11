@@ -1,9 +1,11 @@
 package com.max.hlsdl
 
 import android.content.Context
+import com.max.anno.IHdlEventCallback
 import com.max.entity.TaskEntity
 import com.max.hlsdl.config.HDLConfig
 import com.max.hlsdl.config.HDLState
+import com.max.hlsdl.engine.EventCenter
 import com.max.hlsdl.engine.M3U8Reader
 import com.max.hlsdl.utils.DbHelper
 import com.max.hlsdl.utils.logD
@@ -39,11 +41,11 @@ class HDL {
 
     @Synchronized
     fun create(taskEntity: TaskEntity) {
-        if (get().runningEntityList.size < HDLConfig.MAX_PARALLEL_TASK_NUM) {
+        if (runningEntityList.size < HDLConfig.MAX_PARALLEL_TASK_NUM) {
             val hdlEntity = taskEntity.hdlEntity
             logD("add entity to running,url:${hdlEntity.hlsUrl}")
             hdlEntity.state = HDLState.RUNNING
-            get().runningEntityList.add(taskEntity)
+            runningEntityList.add(taskEntity)
             HDLRepos.insert({ DbHelper.Dao.insertHdlEntity(hdlEntity) }) {
                 M3U8Reader.get().readRemoteM3U8(taskEntity)
             }
@@ -52,16 +54,25 @@ class HDL {
             logD("add entity to wait,url:${hdlEntity.hlsUrl}")
             hdlEntity.state = HDLState.WAIT
             HDLRepos.insert({ DbHelper.Dao.insertHdlEntity(hdlEntity) }) {
-                get().waitingEntityList.add(TaskEntity(hdlEntity, null))
+                waitingEntityList.add(TaskEntity(hdlEntity, null))
+                EventCenter.get().postEvent(HDLState.WAIT, hdlEntity)
             }
         }
     }
 
     fun next(completeTaskEntity: TaskEntity) {
-        get().runningEntityList.remove(completeTaskEntity)
+        runningEntityList.remove(completeTaskEntity)
         if (waitingEntityList.size > 0) {
-            get().create(waitingEntityList.removeAt(0))
+            create(waitingEntityList.removeAt(0))
         }
+    }
+
+    fun register(obj: IHdlEventCallback) {
+        EventCenter.get().addCallback(obj)
+    }
+
+    fun unRegister(obj: IHdlEventCallback) {
+        EventCenter.get().removeCallback(obj)
     }
 
 }

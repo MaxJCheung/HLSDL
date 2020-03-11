@@ -1,6 +1,9 @@
 package com.mba.logic.database_lib.coroutine
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.mba.logic.database_lib.HDLEntity
 import com.mba.logic.database_lib.TSEntity
 
@@ -9,8 +12,12 @@ import com.mba.logic.database_lib.TSEntity
  */
 
 @Dao
-interface HDLDao : TSDao {
+abstract class HDLDao : TSDao, HdlDao {
 
+}
+
+@Dao
+interface HdlDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertHdlEntity(hdlEntity: HDLEntity): Long
 

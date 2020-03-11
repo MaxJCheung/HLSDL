@@ -40,10 +40,11 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
                 HttpUtils.readRemoteStringSync(hdlEntity.hlsUrl)
             }
             M3U8FileParser.get().parse(taskEntity, job.await()) { tes ->
+                taskEntity.hdlEntity.tsEntities=tes
                 HDLRepos.transaction({ DbHelper.Dao.insertTSModels(tes) }) {
                     logD("insert ts model success,insert count:${tes.size}")
                     logD("start download ts for:${hdlEntity.hlsUrl}")
-                    TsDownloader().queueTs(taskEntity, tes)
+                    TsDownloader().queueTs(taskEntity)
                 }
             }
         }

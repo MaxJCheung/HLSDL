@@ -1,6 +1,8 @@
 package com.max.hlsdl.engine
 
-import com.liulishuo.okdownload.*
+import com.liulishuo.okdownload.DownloadListener
+import com.liulishuo.okdownload.DownloadSerialQueue
+import com.liulishuo.okdownload.DownloadTask
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.cause.ResumeFailedCause
@@ -10,7 +12,6 @@ import com.max.hlsdl.HDL
 import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.utils.DbHelper
 import com.max.hlsdl.utils.logD
-import com.mba.logic.database_lib.TSEntity
 import com.mba.logic.database_lib.coroutine.HDLRepos
 
 
@@ -18,8 +19,8 @@ import com.mba.logic.database_lib.coroutine.HDLRepos
  *Create by max　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
  */
 
-const val TASK_TAG_HLS_URL = 0
 const val TASK_TAG_TASK_ENTITY = 1
+const val TASK_TAG_TS_ENTITY_INDEX = 2
 
 class TsDownloader {
 
@@ -43,9 +44,9 @@ class TsDownloader {
     }
 
     @Synchronized
-    fun queueTs(taskEntity: TaskEntity, tsEntities: List<TSEntity>) {
+    fun queueTs(taskEntity: TaskEntity) {
         val serialQueue = DownloadSerialQueue(SingleTaskDownloadListener())
-        tsEntities.forEach { tsEntity ->
+        taskEntity.hdlEntity.tsEntities.forEachIndexed { index, tsEntity ->
             if (tsEntity.state == HDLState.WAIT || tsEntity.state == HDLState.ERR) {
                 val okTask =
                     DownloadTask.Builder(
@@ -54,28 +55,12 @@ class TsDownloader {
                         tsEntity.fileName()
                     )
                         .setPassIfAlreadyCompleted(false).build()
-                okTask.addTag(TASK_TAG_HLS_URL, taskEntity.hdlEntity.hlsUrl)
                 okTask.addTag(TASK_TAG_TASK_ENTITY, taskEntity)
+                okTask.addTag(TASK_TAG_TS_ENTITY_INDEX, index)
                 taskEntity.tsQueue = serialQueue
                 serialQueue.enqueue(okTask)
             }
         }
-    }
-}
-
-class QueueListener : DownloadContextListener {
-    override fun taskEnd(
-        context: DownloadContext,
-        task: DownloadTask,
-        cause: EndCause,
-        realCause: Exception?,
-        remainCount: Int
-    ) {
-        logD("task end ,task url:${task.url}")
-    }
-
-    override fun queueEnd(context: DownloadContext) {
-        logD("download ts complete  for:${context.tasks[0].url}")
     }
 }
 
@@ -127,6 +112,11 @@ class SingleTaskDownloadListener : DownloadListener {
     override fun taskStart(task: DownloadTask) {
         logD("task taskStart,task url:${task.url}")
         HDLRepos.update({ DbHelper.Dao.updateTSState(task.url, HDLState.RUNNING) }) {
+            val taskEntity = (task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
+            val hdlEntity = taskEntity.hdlEntity
+            if (hdlEntity.filterStateTs(HDLState.COMPLETE).isEmpty()) {
+                EventCenter.get().postEvent(HDLState.START, hdlEntity)
+            }
         }
     }
 
@@ -135,18 +125,41 @@ class SingleTaskDownloadListener : DownloadListener {
         when (cause) {
             EndCause.COMPLETED -> {
                 HDLRepos.update({ DbHelper.Dao.updateTSState(task.url, HDLState.COMPLETE) }) {
-
-                    val taskEntity=(task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
-                    if (taskEntity.tsQueue?.waitingTaskCount == 0) {
+                    val taskEntity = (task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
+                    val tsIndex = task.getTag(TASK_TAG_TS_ENTITY_INDEX) as Int
+                    val hdlEntity = taskEntity.hdlEntity
+                    hdlEntity.tsEntities[tsIndex].state = HDLState.COMPLETE
+                    EventCenter.get().postEvent(HDLState.RUNNING, hdlEntity)
+                    if (hdlEntity.filterStateTs(HDLState.COMPLETE).size == hdlEntity.tsEntities.size) {
                         logD("queue complete")
-                        HDLRepos.update({ DbHelper.Dao.updateHdlState(task.getTag(TASK_TAG_HLS_URL) as String, HDLState.COMPLETE)
+                        HDLRepos.update({
+                            DbHelper.Dao.updateHdlState(
+                                taskEntity.hdlEntity.hlsUrl,
+                                HDLState.COMPLETE
+                            )
                         }) {
+                            EventCenter.get().postEvent(HDLState.COMPLETE, hdlEntity)
                             HDL.get().next(taskEntity)
                         }
                     }
                 }
             }
             else -> {
+                val taskEntity = (task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
+                val tsIndex = task.getTag(TASK_TAG_TS_ENTITY_INDEX) as Int
+                val hdlEntity = taskEntity.hdlEntity
+                taskEntity.tsQueue?.shutdown()
+                hdlEntity.tsEntities[tsIndex].state = HDLState.ERR
+                logD("queue complete")
+                HDLRepos.transaction({
+                    DbHelper.Dao.updateHdlState(
+                        taskEntity.hdlEntity.hlsUrl,
+                        HDLState.ERR
+                    )
+                }, { DbHelper.Dao.updateTSState(task.url, HDLState.ERR) }) {
+                    EventCenter.get().postEvent(HDLState.ERR, hdlEntity)
+                    HDL.get().next(taskEntity)
+                }
             }
         }
     }
