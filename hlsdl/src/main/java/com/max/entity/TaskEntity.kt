@@ -10,4 +10,11 @@ import com.mba.logic.database_lib.HDLEntity
 data class TaskEntity(
     var hdlEntity: HDLEntity,
     var tsQueue: DownloadSerialQueue? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (other is TaskEntity) {
+            return other.hdlEntity.hlsUrl == hdlEntity.hlsUrl
+        }
+        return super.equals(other)
+    }
+}

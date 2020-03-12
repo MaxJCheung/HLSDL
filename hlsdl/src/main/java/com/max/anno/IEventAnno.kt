@@ -1,18 +1,19 @@
 package com.max.anno
 
+import com.max.entity.TaskEntity
 import com.mba.logic.database_lib.HDLEntity
 
 interface IHdlEventCallback {
 
-    fun onWait(hdlEntity: HDLEntity)
+    fun onWait(taskEntity: TaskEntity)
 
-    fun onStart(hdlEntity: HDLEntity)
+    fun onStart(taskEntity: TaskEntity)
 
-    fun onComplete(hdlEntity: HDLEntity)
+    fun onComplete(taskEntity: TaskEntity)
 
-    fun onErr(hdlEntity: HDLEntity)
+    fun onErr(taskEntity: TaskEntity)
 
-    fun onRunning(hdlEntity: HDLEntity)
+    fun onRunning(taskEntity: TaskEntity)
 
-    fun onPause(hdlEntity: HDLEntity)
+    fun onPause(taskEntity: TaskEntity)
 }

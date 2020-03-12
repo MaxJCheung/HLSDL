@@ -2,10 +2,8 @@ package com.max.hlsdl.engine
 
 import android.net.Uri
 import com.max.entity.TaskEntity
-import com.max.hlsdl.HDL
 import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.utils.logD
-import com.mba.logic.database_lib.HDLEntity
 import com.mba.logic.database_lib.TSEntity
 
 /**
@@ -31,7 +29,11 @@ class M3U8FileParser {
         }
     }
 
-    fun parse(taskEntity: TaskEntity, content: String, result: (tsEntities: List<TSEntity>) -> Unit) {
+    fun parse(
+        taskEntity: TaskEntity,
+        content: String,
+        result: (tsEntities: List<TSEntity>) -> Unit
+    ) {
         val hlsUrl = taskEntity.hdlEntity.hlsUrl
         logD("parse m3u8 content,url:${hlsUrl}")
         val hlsUri = Uri.parse(hlsUrl)
@@ -52,6 +54,7 @@ class M3U8FileParser {
                     )
                     tsModels.add(tsModel)
                 }
+                logD("m3u8 content parsed")
                 result.invoke(tsModels)
             }
             else -> {//重定向

@@ -32,10 +32,10 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
     final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(configuration, new RoomOpenHelper.Delegate(1) {
       @Override
       public void createAllTables(SupportSQLiteDatabase _db) {
-        _db.execSQL("CREATE TABLE IF NOT EXISTS `TSEntity` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hlsUrl` TEXT NOT NULL, `tsUrl` TEXT NOT NULL, `localPath` TEXT NOT NULL, `size` INTEGER NOT NULL, `state` INTEGER NOT NULL)");
-        _db.execSQL("CREATE TABLE IF NOT EXISTS `HDLEntity` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hlsUrl` TEXT NOT NULL, `extraEntity` TEXT NOT NULL, `localDir` TEXT NOT NULL, `state` INTEGER NOT NULL)");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `TSEntity` (`tsUrl` TEXT NOT NULL, `hlsUrl` TEXT NOT NULL, `localPath` TEXT NOT NULL, `size` INTEGER NOT NULL, `state` INTEGER NOT NULL, PRIMARY KEY(`tsUrl`))");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `HDLEntity` (`hlsUrl` TEXT NOT NULL, `extraEntity` TEXT NOT NULL, `localDir` TEXT NOT NULL, `state` INTEGER NOT NULL, `updateTime` INTEGER NOT NULL, PRIMARY KEY(`hlsUrl`))");
         _db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"1e2f86c6632d8b51b4f551d4008084ec\")");
+        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"a56c80df6decd692b6d9afdb3b3fea1c\")");
       }
 
       @Override
@@ -75,10 +75,9 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
 
       @Override
       protected void validateMigration(SupportSQLiteDatabase _db) {
-        final HashMap<String, TableInfo.Column> _columnsTSEntity = new HashMap<String, TableInfo.Column>(6);
-        _columnsTSEntity.put("id", new TableInfo.Column("id", "INTEGER", true, 1));
+        final HashMap<String, TableInfo.Column> _columnsTSEntity = new HashMap<String, TableInfo.Column>(5);
+        _columnsTSEntity.put("tsUrl", new TableInfo.Column("tsUrl", "TEXT", true, 1));
         _columnsTSEntity.put("hlsUrl", new TableInfo.Column("hlsUrl", "TEXT", true, 0));
-        _columnsTSEntity.put("tsUrl", new TableInfo.Column("tsUrl", "TEXT", true, 0));
         _columnsTSEntity.put("localPath", new TableInfo.Column("localPath", "TEXT", true, 0));
         _columnsTSEntity.put("size", new TableInfo.Column("size", "INTEGER", true, 0));
         _columnsTSEntity.put("state", new TableInfo.Column("state", "INTEGER", true, 0));
@@ -92,11 +91,11 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
                   + " Found:\n" + _existingTSEntity);
         }
         final HashMap<String, TableInfo.Column> _columnsHDLEntity = new HashMap<String, TableInfo.Column>(5);
-        _columnsHDLEntity.put("id", new TableInfo.Column("id", "INTEGER", true, 1));
-        _columnsHDLEntity.put("hlsUrl", new TableInfo.Column("hlsUrl", "TEXT", true, 0));
+        _columnsHDLEntity.put("hlsUrl", new TableInfo.Column("hlsUrl", "TEXT", true, 1));
         _columnsHDLEntity.put("extraEntity", new TableInfo.Column("extraEntity", "TEXT", true, 0));
         _columnsHDLEntity.put("localDir", new TableInfo.Column("localDir", "TEXT", true, 0));
         _columnsHDLEntity.put("state", new TableInfo.Column("state", "INTEGER", true, 0));
+        _columnsHDLEntity.put("updateTime", new TableInfo.Column("updateTime", "INTEGER", true, 0));
         final HashSet<TableInfo.ForeignKey> _foreignKeysHDLEntity = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesHDLEntity = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoHDLEntity = new TableInfo("HDLEntity", _columnsHDLEntity, _foreignKeysHDLEntity, _indicesHDLEntity);
@@ -107,7 +106,7 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
                   + " Found:\n" + _existingHDLEntity);
         }
       }
-    }, "1e2f86c6632d8b51b4f551d4008084ec", "fa1d6d650c21fbe61de2da38eedd8548");
+    }, "a56c80df6decd692b6d9afdb3b3fea1c", "d5cba8ca921063bd80dfe415e42e6e8d");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(configuration.context)
         .name(configuration.name)
         .callback(_openCallback)

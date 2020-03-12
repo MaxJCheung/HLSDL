@@ -42,11 +42,44 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
             try {
                 M3U8FileParser.get().parse(taskEntity, job.await()) { tes ->
                     taskEntity.hdlEntity.tsEntities = tes
-                    HDLRepos.transaction({ DbHelper.Dao.insertTSModels(tes) }) {
-                        logD("start download ts for:${hdlEntity.hlsUrl}")
-                        TsDownloader().queueTs(taskEntity)
-                        runningJob.remove(hdlEntity.hlsUrl)
+                    HDLRepos.query({
+                        DbHelper.Dao.queryHdlTs(
+                            taskEntity.hdlEntity.hlsUrl,
+                            HDLState.COMPLETE
+                        )
+                    }) {
+                        if (it.isNotEmpty()) {
+                            it.forEach {
+                                taskEntity.hdlEntity.tsEntities.forEach { entity ->
+                                    if (it.tsUrl == entity.tsUrl) {
+                                        entity.state = HDLState.COMPLETE
+                                    }
+                                }
+                            }
+                            if (it.size == taskEntity.hdlEntity.tsEntities.size) {
+                                logD("ts all downloaded for: ${hdlEntity.hlsUrl}")
+                                EventCenter.get().postEvent(HDLState.COMPLETE, taskEntity)
+                                HDL.get().next(taskEntity)
+                            } else {
+                                HDLRepos.transaction({
+                                    DbHelper.Dao.insertTSModels(tes)
+                                }) {
+                                    logD("start download ts for:${hdlEntity.hlsUrl}")
+                                    TsDownloader().queueTs(taskEntity)
+                                    runningJob.remove(hdlEntity.hlsUrl)
+                                }
+                            }
+                        }else{
+                            HDLRepos.transaction({
+                                DbHelper.Dao.insertTSModels(tes)
+                            }) {
+                                logD("start download ts for:${hdlEntity.hlsUrl}")
+                                TsDownloader().queueTs(taskEntity)
+                                runningJob.remove(hdlEntity.hlsUrl)
+                            }
+                        }
                     }
+
                 }
             } catch (e: Exception) {
                 logD("read m3u8 err,url:${taskEntity.hdlEntity.hlsUrl}")
@@ -60,6 +93,7 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
                 }
 
             }
+
         }
         runningJob[taskEntity.hdlEntity.hlsUrl] = job
     }
@@ -71,7 +105,7 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
                 state
             )
         }) {
-            EventCenter.get().postEvent(state, taskEntity.hdlEntity)
+            EventCenter.get().postEvent(state, taskEntity)
             HDL.get().next(taskEntity)
         }
     }
@@ -87,7 +121,7 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
             runningJob.remove(url)
             HDLRepos.transaction({ DbHelper.Dao.updateHdlState(url, HDLState.PAUSE) },
                 { DbHelper.Dao.updateHdlTsStateExclude(url, HDLState.PAUSE, HDLState.COMPLETE) }) {
-                EventCenter.get().postEvent(HDLState.PAUSE, taskEntity.hdlEntity)
+                EventCenter.get().postEvent(HDLState.PAUSE, taskEntity)
             }
         }
     }

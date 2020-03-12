@@ -1,8 +1,8 @@
 package com.max.hlsdl.engine
 
 import com.max.anno.IHdlEventCallback
+import com.max.entity.TaskEntity
 import com.max.hlsdl.config.HDLState
-import com.mba.logic.database_lib.HDLEntity
 
 /**
  *Create by max　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
@@ -39,36 +39,38 @@ class EventCenter {
         }
     }
 
-    fun postEvent(state: Int, hdlEntity: HDLEntity) {
+    fun postEvent(state: Int, taskEntity: TaskEntity) {
+//        logD("post event:${state} for ${taskEntity.hdlEntity.hlsUrl}")
+        taskEntity.hdlEntity.state = state
         when (state) {
             HDLState.WAIT -> {
                 callbackList.forEach {
-                    it.onWait(hdlEntity)
+                    it.onWait(taskEntity)
                 }
             }
             HDLState.RUNNING -> {
                 callbackList.forEach {
-                    it.onRunning(hdlEntity)
+                    it.onRunning(taskEntity)
                 }
             }
             HDLState.COMPLETE -> {
                 callbackList.forEach {
-                    it.onComplete(hdlEntity)
+                    it.onComplete(taskEntity)
                 }
             }
             HDLState.ERR -> {
                 callbackList.forEach {
-                    it.onErr(hdlEntity)
+                    it.onErr(taskEntity)
                 }
             }
             HDLState.START -> {
                 callbackList.forEach {
-                    it.onStart(hdlEntity)
+                    it.onStart(taskEntity)
                 }
             }
             HDLState.PAUSE -> {
                 callbackList.forEach {
-                    it.onPause(hdlEntity)
+                    it.onPause(taskEntity)
                 }
             }
         }

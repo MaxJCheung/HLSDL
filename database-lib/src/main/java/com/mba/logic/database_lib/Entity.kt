@@ -4,13 +4,13 @@ import android.net.Uri
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import java.util.*
 
 @Entity
 data class TSEntity(
-    @PrimaryKey(autoGenerate = true)
-    var id: Int = 0,
-    var hlsUrl: String = "",
+    @PrimaryKey
     var tsUrl: String = "",
+    var hlsUrl: String = "",
     var localPath: String = "",
     var size: Long = 0,
     var state: Int = -1
@@ -27,12 +27,12 @@ data class TSEntity(
 
 @Entity
 data class HDLEntity(
-    @PrimaryKey(autoGenerate = true)
-    var id: Int = 0,
+    @PrimaryKey
     var hlsUrl: String = "",
     var extraEntity: String = "",
     var localDir: String = "",
     var state: Int = -1,
+    var updateTime: Long = Date().time,
     @Ignore
     var tsEntities: List<TSEntity> = arrayListOf()
 ) {
@@ -43,5 +43,9 @@ data class HDLEntity(
 
     fun percent(state: Int): Int {
         return (filterStateTs(state).size.div(tsEntities.size.toFloat()) * 100).toInt()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
     }
 }

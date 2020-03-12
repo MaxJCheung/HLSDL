@@ -7,6 +7,7 @@ import com.max.hlsdl.config.HDLConfig
 import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.engine.EventCenter
 import com.max.hlsdl.engine.M3U8Reader
+import com.max.hlsdl.engine.TaskBuilder
 import com.max.hlsdl.engine.TsDownloader
 import com.max.hlsdl.utils.DbHelper
 import com.max.hlsdl.utils.logD
@@ -41,6 +42,14 @@ class HDL {
         HDlDb.init(context)
     }
 
+    fun register(obj: IHdlEventCallback) {
+        EventCenter.get().addCallback(obj)
+    }
+
+    fun unRegister(obj: IHdlEventCallback) {
+        EventCenter.get().removeCallback(obj)
+    }
+
     @Synchronized
     fun create(taskEntity: TaskEntity) {
         if (runningEntityList.size < HDLConfig.MAX_PARALLEL_TASK_NUM) {
@@ -56,8 +65,8 @@ class HDL {
             logD("add entity to wait,url:${hdlEntity.hlsUrl}")
             hdlEntity.state = HDLState.WAIT
             HDLRepos.insert({ DbHelper.Dao.insertHdlEntity(hdlEntity) }) {
-                waitingEntityList.add(TaskEntity(hdlEntity, null))
-                EventCenter.get().postEvent(HDLState.WAIT, hdlEntity)
+                waitingEntityList.add(taskEntity)
+                EventCenter.get().postEvent(HDLState.WAIT, taskEntity)
             }
         }
     }
@@ -65,37 +74,53 @@ class HDL {
     fun next(completeTaskEntity: TaskEntity) {
         runningEntityList.remove(completeTaskEntity)
         if (waitingEntityList.size > 0) {
-            create(waitingEntityList.removeAt(0))
+            if(waitingEntityList[0].hdlEntity.state==HDLState.WAIT){
+                create(waitingEntityList.removeAt(0))
+            }
         }
-    }
-
-    fun register(obj: IHdlEventCallback) {
-        EventCenter.get().addCallback(obj)
-    }
-
-    fun unRegister(obj: IHdlEventCallback) {
-        EventCenter.get().removeCallback(obj)
     }
 
     fun pause(taskEntity: TaskEntity) {
-        if(waitingEntityList.contains(taskEntity)){
-            val url=taskEntity.hdlEntity.hlsUrl
+        if (waitingEntityList.contains(taskEntity)) {
+            val url = taskEntity.hdlEntity.hlsUrl
             waitingEntityList.filter { it.hdlEntity.hlsUrl == url }.forEach {
-                waitingEntityList.remove(taskEntity)
+                waitingEntityList.remove(it)
                 HDLRepos.transaction({ DbHelper.Dao.updateHdlState(url, HDLState.PAUSE) },
-                    { DbHelper.Dao.updateHdlTsStateExclude(url, HDLState.PAUSE,HDLState.COMPLETE) }) {
-                    EventCenter.get().postEvent(HDLState.PAUSE, taskEntity.hdlEntity)
+                    {
+                        DbHelper.Dao.updateHdlTsStateExclude(
+                            url,
+                            HDLState.PAUSE,
+                            HDLState.COMPLETE
+                        )
+                    }) {
+                    EventCenter.get().postEvent(HDLState.PAUSE, it)
                 }
             }
-        }else if(runningEntityList.contains(taskEntity)){
-            runningEntityList.filter { it.hdlEntity.hlsUrl == taskEntity.hdlEntity.hlsUrl }.forEach {
-                if (M3U8Reader.get().isRunning(taskEntity)) {
-                    M3U8Reader.get().pause(taskEntity)
-                } else {
-                    TsDownloader.get().pause(it)
+        } else if (runningEntityList.contains(taskEntity)) {
+            runningEntityList.filter { it.hdlEntity.hlsUrl == taskEntity.hdlEntity.hlsUrl }
+                .forEach {
+                    if (M3U8Reader.get().isRunning(it)) {
+                        M3U8Reader.get().pause(it)
+                        runningEntityList.remove(it)
+                    } else {
+                        TsDownloader.get().pause(it)
+                        runningEntityList.remove(it)
+                    }
                 }
-            }
         }
+    }
+
+    fun pauseAll() {
+        for (i in (waitingEntityList.size - 1)..0) {
+            pause(waitingEntityList[i])
+        }
+        for (i in (runningEntityList.size - 1)..0) {
+            pause(runningEntityList[i])
+        }
+    }
+
+    fun resume(taskEntity: TaskEntity) {
+        create(taskEntity)
     }
 
     fun listTask(callback: (hdlEntityList: List<HDLEntity>) -> Unit) {
@@ -104,4 +129,40 @@ class HDL {
         }
     }
 
+    fun changeMaxParallel(max: Int) {
+        HDLConfig.MAX_PARALLEL_TASK_NUM = max
+        if (runningEntityList.size > max) {
+            pause(runningEntityList.last())
+            if (runningEntityList.size > max) {
+                changeMaxParallel(max)
+            }
+        } else if (runningEntityList.size < max) {
+            if (waitingEntityList.size > 0) {
+                create(waitingEntityList.removeAt(0))
+                if (runningEntityList.size < max) {
+                    changeMaxParallel(max)
+                }
+            }
+        }
+
+    }
+
+    fun getMaxParallel(): Int {
+        return HDLConfig.MAX_PARALLEL_TASK_NUM
+    }
+
+    fun getProcessingCnt(): Int {
+        return runningEntityList.size + waitingEntityList.size
+    }
+
+    fun startAll() {
+        HDLRepos.query({ DbHelper.Dao.queryAllTaskExclude(HDLState.COMPLETE) }) {
+            it.forEachIndexed { index, entity ->
+                val task = TaskBuilder().hlsUrl(entity.hlsUrl).extraEntity("第${index}个")
+                    .fileDir(entity.localDir)
+                    .builder()
+                create(task)
+            }
+        }
+    }
 }

@@ -24,7 +24,7 @@ object HDLRepos : IHDLRepos, CoroutineScope by CoroutineScope(Dispatchers.IO) {
                     err?.invoke(e)
                 }
             }
-            Log.d("Database", "query database in :${time}")
+//            Log.d("Database", "query database in :${time}")
         }
     }
 
