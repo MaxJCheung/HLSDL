@@ -74,7 +74,7 @@ class HDL {
     fun next(completeTaskEntity: TaskEntity) {
         runningEntityList.remove(completeTaskEntity)
         if (waitingEntityList.size > 0) {
-            if(waitingEntityList[0].hdlEntity.state==HDLState.WAIT){
+            if (waitingEntityList[0].hdlEntity.state == HDLState.WAIT) {
                 create(waitingEntityList.removeAt(0))
             }
         }
@@ -111,11 +111,27 @@ class HDL {
     }
 
     fun pauseAll() {
-        for (i in (waitingEntityList.size - 1)..0) {
-            pause(waitingEntityList[i])
+        val wl = waitingEntityList.distinct()
+        for (i in wl.size - 1 downTo 0) {
+            logD("waiting size:${wl.size}")
+            logD("pause  waiting:${wl[i].hdlEntity.hlsUrl}")
+            pause(wl[i])
         }
-        for (i in (runningEntityList.size - 1)..0) {
-            pause(runningEntityList[i])
+        val rl = runningEntityList.distinct()
+        for (i in rl.size - 1 downTo 0) {
+            logD("pause  running:${rl[i].hdlEntity.hlsUrl}")
+            pause(rl[i])
+        }
+    }
+
+    fun startAll() {
+        HDLRepos.query({ DbHelper.Dao.queryAllTaskExclude(HDLState.COMPLETE) }) {
+            it.forEachIndexed { index, entity ->
+                val task = TaskBuilder().hlsUrl(entity.hlsUrl).extraEntity("第${index}个")
+                    .fileDir(entity.localDir)
+                    .builder()
+                create(task)
+            }
         }
     }
 
@@ -155,14 +171,4 @@ class HDL {
         return runningEntityList.size + waitingEntityList.size
     }
 
-    fun startAll() {
-        HDLRepos.query({ DbHelper.Dao.queryAllTaskExclude(HDLState.COMPLETE) }) {
-            it.forEachIndexed { index, entity ->
-                val task = TaskBuilder().hlsUrl(entity.hlsUrl).extraEntity("第${index}个")
-                    .fileDir(entity.localDir)
-                    .builder()
-                create(task)
-            }
-        }
-    }
 }

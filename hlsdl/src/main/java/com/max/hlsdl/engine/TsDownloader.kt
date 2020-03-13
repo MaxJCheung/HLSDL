@@ -116,7 +116,7 @@ class SingleTaskDownloadListener : DownloadListener {
     }
 
     override fun taskStart(task: DownloadTask) {
-        logD("task taskStart,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()}")
+//        logD("task taskStart,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()}")
         HDLRepos.update({ DbHelper.Dao.updateTSState(task.url, HDLState.RUNNING) }) {
             val taskEntity = (task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
             val hdlEntity = taskEntity.hdlEntity
@@ -129,7 +129,7 @@ class SingleTaskDownloadListener : DownloadListener {
     override fun taskEnd(task: DownloadTask, cause: EndCause, realCause: Exception?) {
         when (cause) {
             EndCause.COMPLETED -> {
-                logD("task complate,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()}")
+//                logD("task complate,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()}")
                 HDLRepos.update({ DbHelper.Dao.updateTSState(task.url, HDLState.COMPLETE) }) {
                     val taskEntity = (task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
                     val tsIndex = task.getTag(TASK_TAG_TS_ENTITY_INDEX) as Int

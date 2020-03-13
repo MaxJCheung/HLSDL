@@ -118,12 +118,12 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
 
     override fun onStart(taskEntity: TaskEntity) {
 //        pb_progress.progress = 0
-        taskAdapter?.notifyDataSetChanged()
+        taskAdapter?.notify(taskEntity)
     }
 
     override fun onComplete(taskEntity: TaskEntity) {
 //        tv_progress_text.text = "下载完成，${hdlEntity.hlsUrl}"
-        taskAdapter?.notifyDataSetChanged()
+        taskAdapter?.notify(taskEntity)
         Toast.makeText(this, "download complete ${taskEntity.hdlEntity.hlsUrl}", Toast.LENGTH_LONG)
             .show()
     }
@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
     override fun onErr(taskEntity: TaskEntity) {
 //        tv_progress_text.text = "下载失败，下载停在第：${hdlEntity.filterStateTs(HDLState.COMPLETE).size}个"
         switchState()
-        taskAdapter?.notifyDataSetChanged()
+        taskAdapter?.notify(taskEntity)
         Toast.makeText(this, "download err ${taskEntity.hdlEntity.hlsUrl}", Toast.LENGTH_LONG)
             .show()
     }
@@ -139,12 +139,12 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
     override fun onRunning(taskEntity: TaskEntity) {
 //        tv_progress_text.text =
 //            "当前ts下载数：${hdlEntity.filterStateTs(HDLState.COMPLETE).size}/${hdlEntity.tsEntities.size}"
-        taskAdapter?.notifyDataSetChanged()
+        taskAdapter?.notify(taskEntity)
     }
 
     override fun onPause(taskEntity: TaskEntity) {
 //        tv_progress_text.text = "下载暂停"
         switchState()
-        taskAdapter?.notifyDataSetChanged()
+        taskAdapter?.notify(taskEntity)
     }
 }

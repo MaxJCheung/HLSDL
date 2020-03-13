@@ -17,4 +17,9 @@ data class TaskEntity(
         }
         return super.equals(other)
     }
+
+    fun copyTo(taskEntity: TaskEntity) {
+        taskEntity.hdlEntity = this.hdlEntity
+        taskEntity.tsQueue = this.tsQueue
+    }
 }

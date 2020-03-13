@@ -29,4 +29,13 @@ class TaskAdapter(data: List<TaskEntity>?) :
             else -> "开始"
         }
     }
+
+    fun notify(taskEntity: TaskEntity) {
+        data?.forEachIndexed { index, entity ->
+            if (taskEntity == entity) {
+                taskEntity.copyTo(entity)
+                notifyItemChanged(index)
+            }
+        }
+    }
 }
