@@ -58,6 +58,7 @@ object HDLRepos : IHDLRepos, CoroutineScope by CoroutineScope(Dispatchers.IO) {
                         callback.invoke()
                     }
                 } catch (e: Exception) {
+                    Log.d("Database", "database transaction err :${e.message}")
                     err?.invoke(e)
                 }
             }

@@ -13,7 +13,7 @@ data class TaskEntity(
 ) {
     override fun equals(other: Any?): Boolean {
         if (other is TaskEntity) {
-            return other.hdlEntity.hlsUrl == hdlEntity.hlsUrl
+            return other.hdlEntity.uuid == hdlEntity.uuid
         }
         return super.equals(other)
     }

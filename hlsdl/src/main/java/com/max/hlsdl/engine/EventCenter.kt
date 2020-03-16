@@ -73,6 +73,11 @@ class EventCenter {
                     it.onPause(taskEntity)
                 }
             }
+            HDLState.REMOVED -> {
+                callbackList.forEach {
+                    it.onRemove(taskEntity)
+                }
+            }
         }
     }
 }

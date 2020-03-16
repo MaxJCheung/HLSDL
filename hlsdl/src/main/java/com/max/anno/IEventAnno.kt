@@ -16,4 +16,6 @@ interface IHdlEventCallback {
     fun onRunning(taskEntity: TaskEntity)
 
     fun onPause(taskEntity: TaskEntity)
+
+    fun onRemove(taskEntity: TaskEntity)
 }

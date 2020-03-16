@@ -16,8 +16,8 @@ interface HDLDao : TSDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertHdlEntity(hdlEntity: HDLEntity): Long
 
-    @Query("update HDLEntity set state= :state , updateTime = strftime('%s','now')   where hlsUrl= :hdlUrl")
-    fun updateHdlState(hdlUrl: String, state: Int): Int
+    @Query("update HDLEntity set state= :state , updateTime = strftime('%s','now')   where uuid= :uuid")
+    fun updateHdlState(uuid: String, state: Int): Int
 
     @Query("update TSEntity set state= :state where hlsUrl= :hdlUrl")
     fun updateHdlTsState(hdlUrl: String, state: Int): Int
@@ -26,13 +26,22 @@ interface HDLDao : TSDao {
     fun updateHdlTsStateExclude(hdlUrl: String, state: Int, excludeState: Int): Int
 
     @Query("select * from TSEntity where hlsUrl = :hdlUrl and  state = :state")
-    fun queryHdlTs(hdlUrl: String, state: Int): List<TSEntity>
+    fun queryHdlTsWithState(hdlUrl: String, state: Int): List<TSEntity>
+
+    @Query("select * from TSEntity where hlsUrl = :hdlUrl")
+    fun queryHdlTs(hdlUrl: String): List<TSEntity>
 
     @Query("select * from HDLEntity order by updateTime")
     fun queryAllTask(): List<HDLEntity>
 
     @Query("select * from HDLEntity where state != :state  order by updateTime")
     fun queryAllTaskExclude(state: Int): List<HDLEntity>
+
+    @Query("delete from HDLEntity where uuid = :uuid")
+    fun deleteHdlTask(uuid: String): Int
+
+    @Query("delete from TSEntity where hlsUrl = :hdlUrl")
+    fun deleteHdlTs(hdlUrl: String): Int
 }
 
 @Dao

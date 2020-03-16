@@ -8,6 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.haoge.easyandroid.easy.EasyPermissions
 import com.max.anno.IHdlEventCallback
@@ -80,16 +81,17 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
         initRV()
     }
 
-    private fun switchState(){
+    private fun switchState() {
         if (HDL.get().getProcessingCnt() > 0) {
-            tv_switch.text="暂停全部"
+            tv_switch.text = "暂停全部"
         } else {
-            tv_switch.text="开始全部"
+            tv_switch.text = "开始全部"
         }
     }
 
     private fun initRV() {
         rv_task.layoutManager = LinearLayoutManager(this)
+        (rv_task.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         taskAdapter = TaskAdapter(null)
         rv_task.adapter = taskAdapter
         taskAdapter?.onItemClickListener =
@@ -105,6 +107,13 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
                     }
                 }
             }
+
+        taskAdapter?.onItemChildClickListener =
+            BaseQuickAdapter.OnItemChildClickListener { adapter, view, position ->
+                taskAdapter?.data?.let {
+                    HDL.get().remove(it[position])
+                }
+            }
     }
 
     override fun onWait(taskEntity: TaskEntity) {
@@ -112,6 +121,8 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
         taskAdapter?.data?.let {
             if (!it.contains(taskEntity)) {
                 taskAdapter?.addData(taskEntity)
+            } else {
+                taskAdapter?.notify(taskEntity)
             }
         }
     }
@@ -124,8 +135,8 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
     override fun onComplete(taskEntity: TaskEntity) {
 //        tv_progress_text.text = "下载完成，${hdlEntity.hlsUrl}"
         taskAdapter?.notify(taskEntity)
-        Toast.makeText(this, "download complete ${taskEntity.hdlEntity.hlsUrl}", Toast.LENGTH_LONG)
-            .show()
+//        Toast.makeText(this, "download complete ${taskEntity.hdlEntity.hlsUrl}", Toast.LENGTH_LONG)
+//            .show()
     }
 
     override fun onErr(taskEntity: TaskEntity) {
@@ -146,5 +157,9 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
 //        tv_progress_text.text = "下载暂停"
         switchState()
         taskAdapter?.notify(taskEntity)
+    }
+
+    override fun onRemove(taskEntity: TaskEntity) {
+        taskAdapter?.remove(taskEntity)
     }
 }

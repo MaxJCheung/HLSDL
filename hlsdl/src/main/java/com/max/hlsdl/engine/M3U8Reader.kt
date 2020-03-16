@@ -43,7 +43,7 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
                 M3U8FileParser.get().parse(taskEntity, job.await()) { tes ->
                     taskEntity.hdlEntity.tsEntities = tes
                     HDLRepos.query({
-                        DbHelper.Dao.queryHdlTs(
+                        DbHelper.Dao.queryHdlTsWithState(
                             taskEntity.hdlEntity.hlsUrl,
                             HDLState.COMPLETE
                         )
@@ -66,16 +66,16 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
                                 }) {
                                     logD("start download ts for:${hdlEntity.hlsUrl}")
                                     TsDownloader().queueTs(taskEntity)
-                                    runningJob.remove(hdlEntity.hlsUrl)
+                                    runningJob.remove(hdlEntity.uuid)
                                 }
                             }
-                        }else{
+                        } else {
                             HDLRepos.transaction({
                                 DbHelper.Dao.insertTSModels(tes)
                             }) {
                                 logD("start download ts for:${hdlEntity.hlsUrl}")
                                 TsDownloader().queueTs(taskEntity)
-                                runningJob.remove(hdlEntity.hlsUrl)
+                                runningJob.remove(hdlEntity.uuid)
                             }
                         }
                     }
@@ -95,13 +95,13 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
             }
 
         }
-        runningJob[taskEntity.hdlEntity.hlsUrl] = job
+        runningJob[taskEntity.hdlEntity.uuid] = job
     }
 
     private fun postState(taskEntity: TaskEntity, state: Int) {
         HDLRepos.update({
             DbHelper.Dao.updateHdlState(
-                taskEntity.hdlEntity.hlsUrl,
+                taskEntity.hdlEntity.uuid,
                 state
             )
         }) {
@@ -111,18 +111,38 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     }
 
     fun isRunning(taskEntity: TaskEntity): Boolean {
-        return runningJob.contains(taskEntity.hdlEntity.hlsUrl)
+        return runningJob.contains(taskEntity.hdlEntity.uuid)
     }
 
     fun pause(taskEntity: TaskEntity) {
-        val url = taskEntity.hdlEntity.hlsUrl
-        if (runningJob.contains(url)) {
-            runningJob[url]?.cancel()
-            runningJob.remove(url)
-            HDLRepos.transaction({ DbHelper.Dao.updateHdlState(url, HDLState.PAUSE) },
-                { DbHelper.Dao.updateHdlTsStateExclude(url, HDLState.PAUSE, HDLState.COMPLETE) }) {
+        val uuid = taskEntity.hdlEntity.uuid
+        if (runningJob.contains(uuid)) {
+            runningJob[uuid]?.cancel()
+            runningJob.remove(uuid)
+            HDLRepos.transaction({
+                DbHelper.Dao.updateHdlState(
+                    taskEntity.hdlEntity.uuid,
+                    HDLState.PAUSE
+                )
+            }, {
+                    DbHelper.Dao.updateHdlTsStateExclude(
+                        taskEntity.hdlEntity.hlsUrl,
+                        HDLState.PAUSE,
+                        HDLState.COMPLETE
+                    )
+                }) {
                 EventCenter.get().postEvent(HDLState.PAUSE, taskEntity)
             }
+        }
+    }
+
+    fun remove(taskEntity: TaskEntity) {
+        logD("remove task in m3u8reader")
+        val uuid = taskEntity.hdlEntity.uuid
+        if (runningJob.contains(uuid)) {
+            runningJob[uuid]?.cancel()
+            runningJob.remove(uuid)
+            HDL.get().removeHdl(taskEntity)
         }
     }
 

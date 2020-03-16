@@ -16,6 +16,7 @@ class TaskAdapter(data: List<TaskEntity>?) :
             helper.setText(R.id.tv_title, it.extraEntity)
             helper.setText(R.id.tv_state, parseState(it.state))
             helper.setProgress(R.id.pb_progress, it.percent(HDLState.COMPLETE))
+            helper.addOnClickListener(R.id.tv_delete)
         }
     }
 
@@ -35,6 +36,14 @@ class TaskAdapter(data: List<TaskEntity>?) :
             if (taskEntity == entity) {
                 taskEntity.copyTo(entity)
                 notifyItemChanged(index)
+            }
+        }
+    }
+
+    fun remove(taskEntity: TaskEntity) {
+        for (i in data.size - 1 downTo (0)) {
+            if (taskEntity == data[i]) {
+                remove(i)
             }
         }
     }

@@ -3,7 +3,6 @@ package com.max.hlsdl.engine
 import com.liulishuo.okdownload.DownloadListener
 import com.liulishuo.okdownload.DownloadSerialQueue
 import com.liulishuo.okdownload.DownloadTask
-import com.liulishuo.okdownload.OkDownload
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo
 import com.liulishuo.okdownload.core.cause.EndCause
 import com.liulishuo.okdownload.core.cause.ResumeFailedCause
@@ -67,6 +66,13 @@ class TsDownloader {
     @Synchronized
     fun pause(taskEntity: TaskEntity) {
         taskEntity.tsQueue?.pause()
+    }
+
+    @Synchronized
+    fun remove(taskEntity: TaskEntity) {
+        logD("remove task in tsdownloader")
+        taskEntity.hdlEntity.state = HDLState.REMOVED
+        taskEntity.tsQueue?.shutdown()
     }
 }
 
@@ -135,24 +141,30 @@ class SingleTaskDownloadListener : DownloadListener {
                     val tsIndex = task.getTag(TASK_TAG_TS_ENTITY_INDEX) as Int
                     val hdlEntity = taskEntity.hdlEntity
                     hdlEntity.tsEntities[tsIndex].state = HDLState.COMPLETE
-                    EventCenter.get().postEvent(HDLState.RUNNING, taskEntity)
+                    HDL.get().postProgress(taskEntity)
                     if (hdlEntity.filterStateTs(HDLState.COMPLETE).size == hdlEntity.tsEntities.size) {
                         logD("queue complete")
                         HDLRepos.update({
                             DbHelper.Dao.updateHdlState(
-                                taskEntity.hdlEntity.hlsUrl,
+                                taskEntity.hdlEntity.uuid,
                                 HDLState.COMPLETE
                             )
                         }) {
-                            EventCenter.get().postEvent(HDLState.COMPLETE, taskEntity)
+                            HDL.get().postComplete(taskEntity)
                             HDL.get().next(taskEntity)
                         }
                     }
                 }
             }
             EndCause.CANCELED -> {
-                logD("task pause,task task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX)}")
-                processTaskState(task, HDLState.PAUSE)
+                logD("task canceled,task task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX)}")
+                val taskEntity = (task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
+                val hdlEntity = taskEntity.hdlEntity
+                if (hdlEntity.state == HDLState.REMOVED) {
+                    HDL.get().removeHdl(taskEntity)
+                } else {
+                    processTaskState(task, HDLState.PAUSE)
+                }
             }
             else -> {
                 logD("task err,task task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX)},cause:${cause.name}")
@@ -183,7 +195,7 @@ class SingleTaskDownloadListener : DownloadListener {
         }
         HDLRepos.transaction({
             DbHelper.Dao.updateHdlState(
-                taskEntity.hdlEntity.hlsUrl,
+                taskEntity.hdlEntity.uuid,
                 state
             )
         }, { DbHelper.Dao.updateTSState(task.url, state) }) {

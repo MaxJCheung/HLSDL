@@ -13,8 +13,14 @@ data class TSEntity(
     var hlsUrl: String = "",
     var localPath: String = "",
     var size: Long = 0,
-    var state: Int = -1
+    var state: Int = -1,
+    var uuid: String = ""
 ) {
+
+    init {
+        uuid = UUID.randomUUID().toString()
+    }
+
     fun fileName(): String {
         return if (tsUrl.isNotEmpty()) {
             val uri = Uri.parse(tsUrl)
@@ -28,6 +34,7 @@ data class TSEntity(
 @Entity
 data class HDLEntity(
     @PrimaryKey
+    var uuid: String = "",
     var hlsUrl: String = "",
     var extraEntity: String = "",
     var localDir: String = "",
@@ -36,6 +43,10 @@ data class HDLEntity(
     @Ignore
     var tsEntities: List<TSEntity> = arrayListOf()
 ) {
+
+    init {
+        uuid = UUID.randomUUID().toString()
+    }
 
     fun filterStateTs(state: Int): List<TSEntity> {
         return tsEntities.filter { it.state == state }

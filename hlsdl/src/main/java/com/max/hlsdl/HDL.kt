@@ -7,13 +7,16 @@ import com.max.hlsdl.config.HDLConfig
 import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.engine.EventCenter
 import com.max.hlsdl.engine.M3U8Reader
-import com.max.hlsdl.engine.TaskBuilder
 import com.max.hlsdl.engine.TsDownloader
 import com.max.hlsdl.utils.DbHelper
 import com.max.hlsdl.utils.logD
 import com.mba.logic.database_lib.HDLEntity
 import com.mba.logic.database_lib.HDlDb
 import com.mba.logic.database_lib.coroutine.HDLRepos
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  *Create by max　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
@@ -56,10 +59,12 @@ class HDL {
             val hdlEntity = taskEntity.hdlEntity
             logD("add entity to running,url:${hdlEntity.hlsUrl}")
             hdlEntity.state = HDLState.RUNNING
-            runningEntityList.add(taskEntity)
-            HDLRepos.insert({ DbHelper.Dao.insertHdlEntity(hdlEntity) }) {
-                M3U8Reader.get().readRemoteM3U8(taskEntity)
+            if (runningEntityList.none { it.hdlEntity.hlsUrl == taskEntity.hdlEntity.hlsUrl }) {//相同地址多次加入列表，但只保持一个任务下载
+                HDLRepos.insert({ DbHelper.Dao.insertHdlEntity(hdlEntity) }) {
+                    M3U8Reader.get().readRemoteM3U8(taskEntity)
+                }
             }
+            runningEntityList.add(taskEntity)
         } else {
             val hdlEntity = taskEntity.hdlEntity
             logD("add entity to wait,url:${hdlEntity.hlsUrl}")
@@ -71,7 +76,78 @@ class HDL {
         }
     }
 
+    @Synchronized
+    fun remove(taskEntity: TaskEntity) {
+        when {
+            runningEntityList.contains(taskEntity) -> {
+                CoroutineScope(Dispatchers.Unconfined).launch {
+                    runningEntityList.filter { it == taskEntity }
+                        .forEach {
+                            if (M3U8Reader.get().isRunning(it)) {
+                                M3U8Reader.get().remove(it)
+                                runningEntityList.remove(it)
+                            } else {
+                                TsDownloader.get().remove(it)
+                                runningEntityList.remove(it)
+                            }
+                        }
+                }
+            }
+            waitingEntityList.contains(taskEntity) -> {
+                CoroutineScope(Dispatchers.Unconfined).launch {
+                    val url = taskEntity.hdlEntity.hlsUrl
+                    waitingEntityList.filter { it.hdlEntity.hlsUrl == url }.forEach {
+                        waitingEntityList.remove(it)
+                        removeTaskFile(taskEntity)
+                    }
+                }
+            }
+            else -> {
+                removeTaskFile(taskEntity)
+            }
+        }
+    }
+
+    private fun removeTaskFile(taskEntity: TaskEntity) {
+        val url = taskEntity.hdlEntity.hlsUrl
+        HDLRepos.query({ DbHelper.Dao.queryHdlTs(url) }) { tsList ->
+            tsList.forEach { ts ->
+                val file = File(ts.localPath)
+                if (file.exists()) {
+                    file.delete()
+                }
+            }
+            HDLRepos.transaction({ DbHelper.Dao.deleteHdlTask(taskEntity.hdlEntity.uuid) },
+                { DbHelper.Dao.deleteHdlTs(url) }) {
+                EventCenter.get().postEvent(HDLState.REMOVED, taskEntity)
+            }
+        }
+    }
+
+    @Synchronized
+    fun removeHdl(taskEntity: TaskEntity) {
+        CoroutineScope(Dispatchers.Unconfined).launch {
+            val url = taskEntity.hdlEntity.hlsUrl
+            HDLRepos.query({ DbHelper.Dao.queryHdlTs(url) }) { tsList ->
+                tsList.forEach { ts ->
+                    val file = File(ts.localPath)
+                    if (file.exists()) {
+                        file.delete()
+                    }
+                }
+            }
+            HDLRepos.transaction({ DbHelper.Dao.deleteHdlTask(taskEntity.hdlEntity.uuid) },
+                { DbHelper.Dao.deleteHdlTs(url) }) {
+                logD("task removed ${taskEntity.hdlEntity.hlsUrl}")
+                EventCenter.get().postEvent(HDLState.REMOVED, taskEntity)
+                next(taskEntity)
+            }
+        }
+    }
+
+    @Synchronized
     fun next(completeTaskEntity: TaskEntity) {
+        logD("start next")
         runningEntityList.remove(completeTaskEntity)
         if (waitingEntityList.size > 0) {
             if (waitingEntityList[0].hdlEntity.state == HDLState.WAIT) {
@@ -80,12 +156,18 @@ class HDL {
         }
     }
 
+    @Synchronized
     fun pause(taskEntity: TaskEntity) {
         if (waitingEntityList.contains(taskEntity)) {
             val url = taskEntity.hdlEntity.hlsUrl
-            waitingEntityList.filter { it.hdlEntity.hlsUrl == url }.forEach {
+            waitingEntityList.filter { it == taskEntity }.forEach {
                 waitingEntityList.remove(it)
-                HDLRepos.transaction({ DbHelper.Dao.updateHdlState(url, HDLState.PAUSE) },
+                HDLRepos.transaction({
+                    DbHelper.Dao.updateHdlState(
+                        taskEntity.hdlEntity.uuid,
+                        HDLState.PAUSE
+                    )
+                },
                     {
                         DbHelper.Dao.updateHdlTsStateExclude(
                             url,
@@ -97,7 +179,7 @@ class HDL {
                 }
             }
         } else if (runningEntityList.contains(taskEntity)) {
-            runningEntityList.filter { it.hdlEntity.hlsUrl == taskEntity.hdlEntity.hlsUrl }
+            runningEntityList.filter { it == taskEntity }
                 .forEach {
                     if (M3U8Reader.get().isRunning(it)) {
                         M3U8Reader.get().pause(it)
@@ -110,6 +192,7 @@ class HDL {
         }
     }
 
+    @Synchronized
     fun pauseAll() {
         val wl = waitingEntityList.distinct()
         for (i in wl.size - 1 downTo 0) {
@@ -124,17 +207,17 @@ class HDL {
         }
     }
 
+    @Synchronized
     fun startAll() {
         HDLRepos.query({ DbHelper.Dao.queryAllTaskExclude(HDLState.COMPLETE) }) {
             it.forEachIndexed { index, entity ->
-                val task = TaskBuilder().hlsUrl(entity.hlsUrl).extraEntity("第${index}个")
-                    .fileDir(entity.localDir)
-                    .builder()
+                val task = TaskEntity(hdlEntity = entity)
                 create(task)
             }
         }
     }
 
+    @Synchronized
     fun resume(taskEntity: TaskEntity) {
         create(taskEntity)
     }
@@ -145,6 +228,7 @@ class HDL {
         }
     }
 
+    @Synchronized
     fun changeMaxParallel(max: Int) {
         HDLConfig.MAX_PARALLEL_TASK_NUM = max
         if (runningEntityList.size > max) {
@@ -171,4 +255,15 @@ class HDL {
         return runningEntityList.size + waitingEntityList.size
     }
 
+    fun postComplete(taskEntity: TaskEntity) {
+        runningEntityList.filter { it.hdlEntity.hlsUrl == taskEntity.hdlEntity.hlsUrl }.forEach {
+            EventCenter.get().postEvent(HDLState.COMPLETE, it)
+        }
+    }
+
+    fun postProgress(taskEntity: TaskEntity) {
+        runningEntityList.filter { it.hdlEntity.hlsUrl == taskEntity.hdlEntity.hlsUrl }.forEach {
+            EventCenter.get().postEvent(HDLState.RUNNING, it)
+        }
+    }
 }

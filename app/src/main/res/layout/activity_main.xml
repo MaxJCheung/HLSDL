@@ -24,7 +24,7 @@
         android:padding="15dp"
         android:text="Try Single!"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hls_url" />
+        app:layout_constraintTop_toBottomOf="@id/et_max_num" />
 
     <TextView
         android:id="@+id/tv_mutil"
@@ -54,8 +54,7 @@
         android:layout_height="50dp"
         android:layout_marginEnd="10dp"
         android:inputType="number"
-        app:layout_constraintBottom_toBottomOf="@id/tv_change_max"
-        app:layout_constraintEnd_toStartOf="@+id/tv_change_max" />
+        app:layout_constraintTop_toBottomOf="@id/hls_url" />
 
     <TextView
         android:id="@+id/tv_switch"
