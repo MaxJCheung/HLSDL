@@ -56,6 +56,9 @@ interface TSDao {
     @Query("update TSEntity set state = :state where tsUrl = :tsUrl ")
     fun updateTSState(tsUrl: String, state: Int): Int
 
+    @Query("update TSEntity set state = :state , localPath = :localPath  where tsUrl = :tsUrl ")
+    fun completeTs(tsUrl: String, state: Int, localPath: String): Int
+
     @Query("update TSEntity set state = :state , localPath= :filePath where tsUrl = :tsUrl ")
     fun updateTS(tsUrl: String, state: Int, filePath: String): Int
 }

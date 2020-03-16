@@ -5,7 +5,8 @@ android {
 
 dependencies {
     api project(':database-lib')
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //    implementation files('libs/commons-io-2.5.jar')
     implementation rootProject.ext.dependencies["kotlin_stdlib"]
     implementation rootProject.ext.dependencies["gson"]
     implementation rootProject.ext.dependencies["coroutines"]
@@ -13,4 +14,5 @@ dependencies {
     implementation rootProject.ext.dependencies["okDownloaderCore"]
     implementation rootProject.ext.dependencies["okDownloader"]
     implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])
 }

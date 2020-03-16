@@ -28,6 +28,11 @@ class TaskBuilder {
         return this
     }
 
+    fun fileName(fileName: String): TaskBuilder {
+        hdlEntity.fileName = fileName
+        return this
+    }
+
     fun builder(): TaskEntity {
         return taskEntity
     }

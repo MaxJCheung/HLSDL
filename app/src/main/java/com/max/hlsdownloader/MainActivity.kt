@@ -2,7 +2,7 @@ package com.max.hlsdownloader
 
 import android.Manifest
 import android.os.Bundle
-import android.os.Environment
+import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -57,7 +57,8 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
                         val taskList = arrayListOf<TaskEntity>()
                         urlList.forEachIndexed { index, it ->
                             val task = TaskBuilder().hlsUrl(it).extraEntity("第${index}个")
-                                .fileDir(Environment.getExternalStorageDirectory().absolutePath + "/hdl")
+                                .fileDir(this.getExternalFilesDir(DIRECTORY_DOWNLOADS).absolutePath + "/hdl")
+                                .fileName("$index")
                                 .builder()
                             taskList.add(task)
                             HDL.get().create(task)

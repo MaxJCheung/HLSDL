@@ -40,6 +40,7 @@ data class HDLEntity(
     var localDir: String = "",
     var state: Int = -1,
     var updateTime: Long = Date().time,
+    var fileName: String = "",
     @Ignore
     var tsEntities: List<TSEntity> = arrayListOf()
 ) {

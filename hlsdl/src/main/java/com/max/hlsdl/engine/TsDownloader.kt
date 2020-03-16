@@ -11,6 +11,7 @@ import com.max.entity.TaskEntity
 import com.max.hlsdl.HDL
 import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.utils.DbHelper
+import com.max.hlsdl.utils.MergeUtils
 import com.max.hlsdl.utils.logD
 import com.mba.logic.database_lib.coroutine.HDLRepos
 
@@ -122,7 +123,7 @@ class SingleTaskDownloadListener : DownloadListener {
     }
 
     override fun taskStart(task: DownloadTask) {
-//        logD("task taskStart,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()}")
+        logD("task taskStart,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()},local path:${task.file?.absolutePath}")
         HDLRepos.update({ DbHelper.Dao.updateTSState(task.url, HDLState.RUNNING) }) {
             val taskEntity = (task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
             val hdlEntity = taskEntity.hdlEntity
@@ -136,22 +137,32 @@ class SingleTaskDownloadListener : DownloadListener {
         when (cause) {
             EndCause.COMPLETED -> {
 //                logD("task complate,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()}")
-                HDLRepos.update({ DbHelper.Dao.updateTSState(task.url, HDLState.COMPLETE) }) {
+                HDLRepos.update({
+                    DbHelper.Dao.completeTs(
+                        task.url,
+                        HDLState.COMPLETE,
+                        task.file?.absolutePath ?: ""
+                    )
+                }) {
                     val taskEntity = (task.getTag(TASK_TAG_TASK_ENTITY) as TaskEntity)
                     val tsIndex = task.getTag(TASK_TAG_TS_ENTITY_INDEX) as Int
                     val hdlEntity = taskEntity.hdlEntity
-                    hdlEntity.tsEntities[tsIndex].state = HDLState.COMPLETE
+                    val tsTask = hdlEntity.tsEntities[tsIndex]
+                    tsTask.state = HDLState.COMPLETE
+                    tsTask.localPath = task.file?.absolutePath ?: ""
                     HDL.get().postProgress(taskEntity)
                     if (hdlEntity.filterStateTs(HDLState.COMPLETE).size == hdlEntity.tsEntities.size) {
                         logD("queue complete")
-                        HDLRepos.update({
-                            DbHelper.Dao.updateHdlState(
-                                taskEntity.hdlEntity.uuid,
-                                HDLState.COMPLETE
-                            )
-                        }) {
-                            HDL.get().postComplete(taskEntity)
-                            HDL.get().next(taskEntity)
+                        MergeUtils.mergeTs(taskEntity) {
+                            HDLRepos.update({
+                                DbHelper.Dao.updateHdlState(
+                                    taskEntity.hdlEntity.uuid,
+                                    HDLState.COMPLETE
+                                )
+                            }) {
+                                HDL.get().postComplete(taskEntity)
+                                HDL.get().next(taskEntity)
+                            }
                         }
                     }
                 }
