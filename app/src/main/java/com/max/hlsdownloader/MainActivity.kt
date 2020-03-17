@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity(), IHdlEventCallback {
                     if (grant) {
                         val taskList = arrayListOf<TaskEntity>()
                         urlList.forEachIndexed { index, it ->
-                            val task = TaskBuilder().hlsUrl(it).extraEntity("第${index}个")
+                            val task = TaskBuilder().hlsUrl(it).extra("title", "第${index}个")
                                 .fileDir(this.getExternalFilesDir(DIRECTORY_DOWNLOADS).absolutePath + "/hdl")
                                 .fileName("$index")
                                 .builder()

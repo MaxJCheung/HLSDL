@@ -1,6 +1,5 @@
 package com.max.hlsdl.engine
 
-import com.google.gson.Gson
 import com.max.entity.TaskEntity
 import com.mba.logic.database_lib.HDLEntity
 
@@ -11,15 +10,10 @@ import com.mba.logic.database_lib.HDLEntity
 class TaskBuilder {
 
     private var hdlEntity: HDLEntity = HDLEntity()
-    private var taskEntity: TaskEntity = TaskEntity(hdlEntity, null)
+    private var taskEntity: TaskEntity = TaskEntity(hdlEntity)
 
     fun hlsUrl(hlsUrl: String): TaskBuilder {
         hdlEntity.hlsUrl = hlsUrl
-        return this
-    }
-
-    fun extraEntity(obj: Any): TaskBuilder {
-        hdlEntity.extraEntity = Gson().toJson(obj)
         return this
     }
 
@@ -32,6 +26,12 @@ class TaskBuilder {
         hdlEntity.fileName = fileName
         return this
     }
+
+    fun extra(key: String, obj: Any): TaskBuilder {
+        taskEntity.hdlEntity.extra[key] = obj
+        return this
+    }
+
 
     fun builder(): TaskEntity {
         return taskEntity

@@ -16,6 +16,7 @@ dependencies {
     api rootProject.ext.dependencies["room_runtime"]
     api rootProject.ext.dependencies["room_rx"]
     api rootProject.ext.dependencies["room_ktx"]
+    api rootProject.ext.dependencies["gson"]
     kapt rootProject.ext.dependencies["room_compile"]
 }
 

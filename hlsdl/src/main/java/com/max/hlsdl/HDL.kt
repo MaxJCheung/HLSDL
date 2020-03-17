@@ -10,7 +10,6 @@ import com.max.hlsdl.engine.M3U8Reader
 import com.max.hlsdl.engine.TsDownloader
 import com.max.hlsdl.utils.DbHelper
 import com.max.hlsdl.utils.logD
-import com.mba.logic.database_lib.HDLEntity
 import com.mba.logic.database_lib.HDlDb
 import com.mba.logic.database_lib.coroutine.HDLRepos
 import kotlinx.coroutines.CoroutineScope
@@ -222,9 +221,13 @@ class HDL {
         create(taskEntity)
     }
 
-    fun listTask(callback: (hdlEntityList: List<HDLEntity>) -> Unit) {
+    fun listTask(callback: (hdlEntityList: List<TaskEntity>) -> Unit) {
         HDLRepos.query({ DbHelper.Dao.queryAllTask() }) {
-            callback.invoke(it)
+            val taskList = arrayListOf<TaskEntity>()
+            it.forEach { hdl ->
+                taskList.add(TaskEntity(hdl))
+            }
+            callback.invoke(taskList)
         }
     }
 

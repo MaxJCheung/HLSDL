@@ -36,11 +36,11 @@ data class HDLEntity(
     @PrimaryKey
     var uuid: String = "",
     var hlsUrl: String = "",
-    var extraEntity: String = "",
     var localDir: String = "",
     var state: Int = -1,
     var updateTime: Long = Date().time,
     var fileName: String = "",
+    var extra: HashMap<String, Any> = hashMapOf(),
     @Ignore
     var tsEntities: List<TSEntity> = arrayListOf()
 ) {

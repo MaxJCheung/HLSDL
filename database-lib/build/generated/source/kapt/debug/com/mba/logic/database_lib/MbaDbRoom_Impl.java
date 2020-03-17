@@ -33,9 +33,9 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
       @Override
       public void createAllTables(SupportSQLiteDatabase _db) {
         _db.execSQL("CREATE TABLE IF NOT EXISTS `TSEntity` (`tsUrl` TEXT NOT NULL, `hlsUrl` TEXT NOT NULL, `localPath` TEXT NOT NULL, `size` INTEGER NOT NULL, `state` INTEGER NOT NULL, `uuid` TEXT NOT NULL, PRIMARY KEY(`tsUrl`))");
-        _db.execSQL("CREATE TABLE IF NOT EXISTS `HDLEntity` (`uuid` TEXT NOT NULL, `hlsUrl` TEXT NOT NULL, `extraEntity` TEXT NOT NULL, `localDir` TEXT NOT NULL, `state` INTEGER NOT NULL, `updateTime` INTEGER NOT NULL, `fileName` TEXT NOT NULL, PRIMARY KEY(`uuid`))");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `HDLEntity` (`uuid` TEXT NOT NULL, `hlsUrl` TEXT NOT NULL, `localDir` TEXT NOT NULL, `state` INTEGER NOT NULL, `updateTime` INTEGER NOT NULL, `fileName` TEXT NOT NULL, `extra` TEXT NOT NULL, PRIMARY KEY(`uuid`))");
         _db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"3fd5c76abb5f28d0851c0be9c48c844c\")");
+        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"3ca2ecb8d080fe5d31a7ab8b82eae26b\")");
       }
 
       @Override
@@ -94,11 +94,11 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
         final HashMap<String, TableInfo.Column> _columnsHDLEntity = new HashMap<String, TableInfo.Column>(7);
         _columnsHDLEntity.put("uuid", new TableInfo.Column("uuid", "TEXT", true, 1));
         _columnsHDLEntity.put("hlsUrl", new TableInfo.Column("hlsUrl", "TEXT", true, 0));
-        _columnsHDLEntity.put("extraEntity", new TableInfo.Column("extraEntity", "TEXT", true, 0));
         _columnsHDLEntity.put("localDir", new TableInfo.Column("localDir", "TEXT", true, 0));
         _columnsHDLEntity.put("state", new TableInfo.Column("state", "INTEGER", true, 0));
         _columnsHDLEntity.put("updateTime", new TableInfo.Column("updateTime", "INTEGER", true, 0));
         _columnsHDLEntity.put("fileName", new TableInfo.Column("fileName", "TEXT", true, 0));
+        _columnsHDLEntity.put("extra", new TableInfo.Column("extra", "TEXT", true, 0));
         final HashSet<TableInfo.ForeignKey> _foreignKeysHDLEntity = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesHDLEntity = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoHDLEntity = new TableInfo("HDLEntity", _columnsHDLEntity, _foreignKeysHDLEntity, _indicesHDLEntity);
@@ -109,7 +109,7 @@ public final class MbaDbRoom_Impl extends MbaDbRoom {
                   + " Found:\n" + _existingHDLEntity);
         }
       }
-    }, "3fd5c76abb5f28d0851c0be9c48c844c", "2c78e0c710d922a62d5c386782d1c0b2");
+    }, "3ca2ecb8d080fe5d31a7ab8b82eae26b", "8c3c5ce08ae5e1f37c26ae8b9fe1f458");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(configuration.context)
         .name(configuration.name)
         .callback(_openCallback)
