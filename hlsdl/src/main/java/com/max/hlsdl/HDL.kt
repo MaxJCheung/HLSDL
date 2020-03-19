@@ -10,8 +10,8 @@ import com.max.hlsdl.engine.M3U8Reader
 import com.max.hlsdl.engine.TsDownloader
 import com.max.hlsdl.utils.DbHelper
 import com.max.hlsdl.utils.logD
-import com.mba.logic.database_lib.HDlDb
-import com.mba.logic.database_lib.coroutine.HDLRepos
+import com.mba.hdl.database_lib.HDlDb
+import com.mba.hdl.database_lib.coroutine.HDLRepos
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

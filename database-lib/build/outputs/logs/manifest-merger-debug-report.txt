@@ -1,25 +1,25 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
-INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
-INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
-INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
-INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
-INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
-INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
+ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
+INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
+INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
+INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
+INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
+INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
+INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
 	package
-		ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:11-47
+		ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:11-45
 		INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml
 		INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml
 	android:versionName
 		INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml
-		ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
+		ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
 		INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml
 	xmlns:android
-		ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
+		ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
 	android:versionCode
 		INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml
-		ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-50
+		ADDED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml:1:1-48
 		INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml
 uses-sdk
 INJECTED from /Users/jiancheung/Documents/dev/workspace/HLSDL/database-lib/src/main/AndroidManifest.xml reason: use-sdk injection requested

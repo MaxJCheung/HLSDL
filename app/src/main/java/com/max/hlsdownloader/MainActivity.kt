@@ -21,9 +21,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity(), IHdlEventCallback {
 
     private val urlList = arrayListOf(
+        "https://1400159363.vod2.myqcloud.com/d1b98d8avodtranscq1400159363/df73985b5285890791279350949/drm/v.f220.m3u8",
+        "https://1400159363.vod2.myqcloud.com/d1b98d8avodtranscq1400159363/4cd36cdb5285890788085662375/v.f220.m3u8",
         "https://1400159363.vod2.myqcloud.com/d1b98d8avodtranscq1400159363/782cac6b5285890783014762254/drm/v.f230.m3u8",
-        "https://1400159363.vod2.myqcloud.com/d1b98d8avodtranscq1400159363/b1fa7fb95285890786144279519/v.f220.m3u8",
-        "https://1400159363.vod2.myqcloud.com/d1b98d8avodtranscq1400159363/4cd36cdb5285890788085662375/v.f220.m3u8"
+        "https://1400159363.vod2.myqcloud.com/d1b98d8avodtranscq1400159363/b1fa7fb95285890786144279519/v.f220.m3u8"
     )
 
     private var taskAdapter: TaskAdapter? = null

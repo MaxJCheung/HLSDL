@@ -6,7 +6,7 @@ import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.utils.DbHelper
 import com.max.hlsdl.utils.HttpUtils
 import com.max.hlsdl.utils.logD
-import com.mba.logic.database_lib.coroutine.HDLRepos
+import com.mba.hdl.database_lib.coroutine.HDLRepos
 import kotlinx.coroutines.*
 
 
@@ -40,7 +40,9 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
                 HttpUtils.readRemoteStringSync(hdlEntity.hlsUrl)
             }
             try {
-                M3U8FileParser.get().parse(taskEntity, job.await()) { tes ->
+                val content = job.await()
+//                logD(content)
+                M3U8FileParser.get().parse(taskEntity, content) { tes ->
                     taskEntity.hdlEntity.tsEntities = tes
                     HDLRepos.query({
                         DbHelper.Dao.queryHdlTsWithState(
@@ -125,12 +127,12 @@ class M3U8Reader : CoroutineScope by CoroutineScope(Dispatchers.IO) {
                     HDLState.PAUSE
                 )
             }, {
-                    DbHelper.Dao.updateHdlTsStateExclude(
-                        taskEntity.hdlEntity.hlsUrl,
-                        HDLState.PAUSE,
-                        HDLState.COMPLETE
-                    )
-                }) {
+                DbHelper.Dao.updateHdlTsStateExclude(
+                    taskEntity.hdlEntity.hlsUrl,
+                    HDLState.PAUSE,
+                    HDLState.COMPLETE
+                )
+            }) {
                 EventCenter.get().postEvent(HDLState.PAUSE, taskEntity)
             }
         }

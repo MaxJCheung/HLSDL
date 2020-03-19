@@ -13,7 +13,7 @@ class TaskAdapter(data: List<TaskEntity>?) :
     BaseQuickAdapter<TaskEntity, BaseViewHolder>(R.layout.item_task_list, data) {
     override fun convert(helper: BaseViewHolder, item: TaskEntity?) {
         item?.hdlEntity?.let {
-            helper.setText(R.id.tv_title, item.extra["title"].toString())
+            helper.setText(R.id.tv_title, item.hdlEntity.extra["title"].toString())
             helper.setText(R.id.tv_state, parseState(it.state))
             helper.setProgress(R.id.pb_progress, it.percent(HDLState.COMPLETE))
             helper.addOnClickListener(R.id.tv_delete)

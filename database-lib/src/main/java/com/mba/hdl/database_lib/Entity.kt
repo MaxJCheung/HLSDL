@@ -1,4 +1,4 @@
-package com.mba.logic.database_lib
+package com.mba.hdl.database_lib
 
 import android.net.Uri
 import androidx.room.Entity
@@ -14,7 +14,10 @@ data class TSEntity(
     var localPath: String = "",
     var size: Long = 0,
     var state: Int = -1,
-    var uuid: String = ""
+    var uuid: String = "",
+    var encodeMethod: String = "",
+    var encodeUri: String = "",
+    var IV: String = ""
 ) {
 
     init {
@@ -40,7 +43,7 @@ data class HDLEntity(
     var state: Int = -1,
     var updateTime: Long = Date().time,
     var fileName: String = "",
-    var extra: HashMap<String, Any> = hashMapOf(),
+    var extra: HashMap<String, String> = hashMapOf(),
     @Ignore
     var tsEntities: List<TSEntity> = arrayListOf()
 ) {

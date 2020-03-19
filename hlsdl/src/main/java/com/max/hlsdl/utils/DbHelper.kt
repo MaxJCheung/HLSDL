@@ -1,7 +1,7 @@
 package com.max.hlsdl.utils
 
-import com.mba.logic.database_lib.HDlDb
-import com.mba.logic.database_lib.coroutine.HDLDao
+import com.mba.hdl.database_lib.HDlDb
+import com.mba.hdl.database_lib.coroutine.HDLDao
 
 class DbHelper {
     companion object {

@@ -1,11 +1,11 @@
-package com.mba.logic.database_lib.coroutine
+package com.mba.hdl.database_lib.coroutine
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.mba.logic.database_lib.HDLEntity
-import com.mba.logic.database_lib.TSEntity
+import com.mba.hdl.database_lib.HDLEntity
+import com.mba.hdl.database_lib.TSEntity
 
 /**
  *Create by max　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　

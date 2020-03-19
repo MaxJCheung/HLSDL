@@ -11,9 +11,8 @@ import com.max.entity.TaskEntity
 import com.max.hlsdl.HDL
 import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.utils.DbHelper
-import com.max.hlsdl.utils.MergeUtils
 import com.max.hlsdl.utils.logD
-import com.mba.logic.database_lib.coroutine.HDLRepos
+import com.mba.hdl.database_lib.coroutine.HDLRepos
 
 
 /**
@@ -136,7 +135,7 @@ class SingleTaskDownloadListener : DownloadListener {
     override fun taskEnd(task: DownloadTask, cause: EndCause, realCause: Exception?) {
         when (cause) {
             EndCause.COMPLETED -> {
-//                logD("task complate,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()}")
+                logD("task complate,task index:${task.getTag(TASK_TAG_TS_ENTITY_INDEX).toString()}")
                 HDLRepos.update({
                     DbHelper.Dao.completeTs(
                         task.url,
@@ -152,18 +151,18 @@ class SingleTaskDownloadListener : DownloadListener {
                     tsTask.localPath = task.file?.absolutePath ?: ""
                     HDL.get().postProgress(taskEntity)
                     if (hdlEntity.filterStateTs(HDLState.COMPLETE).size == hdlEntity.tsEntities.size) {
-                        logD("queue complete")
-                        MergeUtils.mergeTs(taskEntity) {
-                            HDLRepos.update({
-                                DbHelper.Dao.updateHdlState(
-                                    taskEntity.hdlEntity.uuid,
-                                    HDLState.COMPLETE
-                                )
-                            }) {
-                                HDL.get().postComplete(taskEntity)
-                                HDL.get().next(taskEntity)
-                            }
+//                        MergeUtils.mergeTs(taskEntity) {
+                        HDLRepos.update({
+                            DbHelper.Dao.updateHdlState(
+                                taskEntity.hdlEntity.uuid,
+                                HDLState.COMPLETE
+                            )
+                        }) {
+                            logD("task complete")
+                            HDL.get().postComplete(taskEntity)
+                            HDL.get().next(taskEntity)
                         }
+//                        }
                     }
                 }
             }

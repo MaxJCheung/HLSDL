@@ -1,7 +1,6 @@
 package com.max.anno
 
 import com.max.entity.TaskEntity
-import com.mba.logic.database_lib.HDLEntity
 
 interface IHdlEventCallback {
 

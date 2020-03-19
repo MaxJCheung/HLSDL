@@ -1,7 +1,7 @@
 package com.max.entity
 
 import com.liulishuo.okdownload.DownloadSerialQueue
-import com.mba.logic.database_lib.HDLEntity
+import com.mba.hdl.database_lib.HDLEntity
 
 /**
  *Create by max　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　

@@ -1,10 +1,11 @@
 package com.max.hlsdl.engine
 
 import android.net.Uri
+import com.google.gson.Gson
 import com.max.entity.TaskEntity
 import com.max.hlsdl.config.HDLState
 import com.max.hlsdl.utils.logD
-import com.mba.logic.database_lib.TSEntity
+import com.mba.hdl.database_lib.TSEntity
 
 /**
  *Create by max　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
@@ -37,22 +38,35 @@ class M3U8FileParser {
         val hlsUrl = taskEntity.hdlEntity.hlsUrl
         logD("parse m3u8 content,url:${hlsUrl}")
         val hlsUri = Uri.parse(hlsUrl)
-        val contentList = content.reader().readLines().filter { !it.startsWith("#") }
+        val contentList = content.reader().readLines()
+            .filter { !it.startsWith("#") || it.startsWith("#EXT-X-KEY") }
         when {
             contentList.size > 1 -> {
+                logD("m3u8 list:${Gson().toJson(contentList)}")
                 val tsModels = arrayListOf<TSEntity>()
-                contentList.forEach {
-                    val ts = if (!it.startsWith("/")) {
-                        hlsUrl.substring(0, hlsUrl.lastIndexOf("/") + 1) + it
-                    } else {
-                        "${hlsUri.scheme}://${hlsUri.host}$it"
+                contentList.forEachIndexed {index,uri->
+                    when{
+                        !uri.startsWith("#")->{
+                            val ts = if (!uri.startsWith("/")) {
+                                hlsUrl.substring(0, hlsUrl.lastIndexOf("/") + 1) + uri
+                            } else {
+                                "${hlsUri.scheme}://${hlsUri.host}$uri"
+                            }
+                            val tsModel = TSEntity(
+                                hlsUrl = hlsUrl,
+                                tsUrl = ts,
+                                state = HDLState.WAIT
+                            )
+                            if(index>1&&contentList[index-1].startsWith("#EXT-X-KEY")){
+                                val encode=contentList[index-1]
+                                TODO("save key uri")
+                            }
+                            tsModels.add(tsModel)
+                        }
+                        else->{
+                        }
                     }
-                    val tsModel = TSEntity(
-                        hlsUrl = hlsUrl,
-                        tsUrl = ts,
-                        state = HDLState.WAIT
-                    )
-                    tsModels.add(tsModel)
+
                 }
                 logD("m3u8 content parsed")
                 result.invoke(tsModels)

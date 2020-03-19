@@ -1,7 +1,8 @@
 package com.max.hlsdl.engine
 
+import com.google.gson.Gson
 import com.max.entity.TaskEntity
-import com.mba.logic.database_lib.HDLEntity
+import com.mba.hdl.database_lib.HDLEntity
 
 /**
  *Create by max　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
@@ -28,7 +29,7 @@ class TaskBuilder {
     }
 
     fun extra(key: String, obj: Any): TaskBuilder {
-        taskEntity.hdlEntity.extra[key] = obj
+        taskEntity.hdlEntity.extra[key] = Gson().toJson(obj)
         return this
     }
 
